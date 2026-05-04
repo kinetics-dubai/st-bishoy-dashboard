@@ -1,0 +1,20 @@
+/* RTL Arrow Direction Fix */
+[dir="rtl"] .arrow-left {
+  transform: rotate(180deg);
+}
+
+/* For Ant Design icons specifically */
+[dir="rtl"] .anticon-arrow-left {
+  transform: rotate(180deg);
+}
+
+/* For Lucide icons */
+[dir="rtl"] .lucide-arrow-left {
+  transform: rotate(180deg);
+}
+
+/* Ensure smooth transition */
+[dir="rtl"] .anticon-arrow-left,
+[dir="rtl"] .lucide-arrow-left {
+  transition: transform 0.2s ease;
+}
