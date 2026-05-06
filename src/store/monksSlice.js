@@ -2,61 +2,81 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiService from '@/services/apiService';
 import { buildQuery } from '@/lib/queryHelper';
 
-export const fetchClerics = createAsyncThunk(
-  'clerics/fetchClerics',
+const normalizeMonk = (monk) => {
+  if (!monk) return monk;
+
+  return {
+    id: monk.id,
+    name: monk.name || '',
+    name_ar: monk.name_ar || '',
+    rank: monk.rank || '',
+    position: monk.position || '',
+    position_ar: monk.position_ar || '',
+    bio: monk.bio || '',
+    bio_ar: monk.bio_ar || '',
+    departed: Boolean(monk.departed),
+    ...monk,
+  };
+};
+
+export const fetchMonks = createAsyncThunk(
+  'monks/fetchMonks',
   async (params = {}, { rejectWithValue }) => {
     try {
       const queryString = buildQuery(params);
-      const url = queryString ? `/clerics?${queryString}` : '/clerics';
+      const url = queryString ? `/monks?${queryString}` : '/monks';
       const response = await apiService.get(url);
-      return response.data;
+      return {
+        ...response.data,
+        data: (response.data?.data || []).map(normalizeMonk),
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
-export const fetchCleric = createAsyncThunk(
-  'clerics/fetchCleric',
+export const fetchMonk = createAsyncThunk(
+  'monks/fetchMonk',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/clerics/${id}`);
-      return response.data?.data;
+      const response = await apiService.get(`/monks/${id}`);
+      return normalizeMonk(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
-export const createCleric = createAsyncThunk(
-  'clerics/createCleric',
+export const createMonk = createAsyncThunk(
+  'monks/createMonk',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await apiService.post('/clerics', data);
-      return response.data?.data;
+      const response = await apiService.post('/monks', data);
+      return normalizeMonk(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
-export const updateCleric = createAsyncThunk(
-  'clerics/updateCleric',
+export const updateMonk = createAsyncThunk(
+  'monks/updateMonk',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch(`/clerics/${id}`, data);
-      return response.data?.data;
+      const response = await apiService.patch(`/monks/${id}`, data);
+      return normalizeMonk(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
-export const deleteCleric = createAsyncThunk(
-  'clerics/deleteCleric',
+export const deleteMonk = createAsyncThunk(
+  'monks/deleteMonk',
   async (id, { rejectWithValue }) => {
     try {
-      await apiService.delete(`/clerics/${id}`);
+      await apiService.delete(`/monks/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -65,8 +85,8 @@ export const deleteCleric = createAsyncThunk(
 );
 
 const initialState = {
-  clerics: [],
-  currentCleric: null,
+  monks: [],
+  currentMonk: null,
   page: 1,
   limit: 10,
   total: 0,
@@ -79,12 +99,12 @@ const initialState = {
   currentListRequestId: null,
 };
 
-const clericsSlice = createSlice({
-  name: 'clerics',
+const monksSlice = createSlice({
+  name: 'monks',
   initialState,
   reducers: {
-    clearCurrentCleric: (state) => {
-      state.currentCleric = null;
+    clearCurrentMonk: (state) => {
+      state.currentMonk = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -102,24 +122,22 @@ const clericsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Clerics
-      .addCase(fetchClerics.pending, (state, action) => {
+      .addCase(fetchMonks.pending, (state, action) => {
         state.loading = true;
         state.error = null;
         state.currentListRequestId = action.meta.requestId;
       })
-      .addCase(fetchClerics.fulfilled, (state, action) => {
+      .addCase(fetchMonks.fulfilled, (state, action) => {
         if (state.currentListRequestId !== action.meta.requestId) {
           return;
         }
 
         state.loading = false;
-        state.clerics = action.payload?.data || [];
-        // Use totalCount from API response, fallback to data length
+        state.monks = action.payload?.data || [];
         state.total = action.payload?.totalCount || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
-      .addCase(fetchClerics.rejected, (state, action) => {
+      .addCase(fetchMonks.rejected, (state, action) => {
         if (state.currentListRequestId !== action.meta.requestId) {
           return;
         }
@@ -128,79 +146,71 @@ const clericsSlice = createSlice({
         state.error = action.payload;
         state.currentListRequestId = null;
       })
-      
-      // Fetch Single Cleric
-      .addCase(fetchCleric.pending, (state) => {
+      .addCase(fetchMonk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCleric.fulfilled, (state, action) => {
+      .addCase(fetchMonk.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentCleric = action.payload;
+        state.currentMonk = action.payload;
       })
-      .addCase(fetchCleric.rejected, (state, action) => {
+      .addCase(fetchMonk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      
-      // Create Cleric
-      .addCase(createCleric.pending, (state) => {
+      .addCase(createMonk.pending, (state) => {
         state.creating = true;
         state.error = null;
       })
-      .addCase(createCleric.fulfilled, (state, action) => {
+      .addCase(createMonk.fulfilled, (state, action) => {
         state.creating = false;
         if (action.payload) {
-          state.clerics.push(action.payload);
+          state.monks.push(action.payload);
           state.total += 1;
         }
       })
-      .addCase(createCleric.rejected, (state, action) => {
+      .addCase(createMonk.rejected, (state, action) => {
         state.creating = false;
         state.error = action.payload;
       })
-      
-      // Update Cleric
-      .addCase(updateCleric.pending, (state) => {
+      .addCase(updateMonk.pending, (state) => {
         state.updating = true;
         state.error = null;
       })
-      .addCase(updateCleric.fulfilled, (state, action) => {
+      .addCase(updateMonk.fulfilled, (state, action) => {
         state.updating = false;
         if (action.payload) {
-          const index = state.clerics.findIndex(c => c.id === action.payload.id);
+          const index = state.monks.findIndex((m) => m.id === action.payload.id);
           if (index !== -1) {
-            state.clerics[index] = action.payload;
+            state.monks[index] = action.payload;
           }
-          if (state.currentCleric?.id === action.payload.id) {
-            state.currentCleric = action.payload;
+          if (state.currentMonk?.id === action.payload.id) {
+            state.currentMonk = action.payload;
           }
         }
       })
-      .addCase(updateCleric.rejected, (state, action) => {
+      .addCase(updateMonk.rejected, (state, action) => {
         state.updating = false;
         state.error = action.payload;
       })
-      
-      // Delete Cleric
-      .addCase(deleteCleric.pending, (state) => {
+      .addCase(deleteMonk.pending, (state) => {
         state.deleting = true;
         state.error = null;
       })
-      .addCase(deleteCleric.fulfilled, (state, action) => {
+      .addCase(deleteMonk.fulfilled, (state, action) => {
         state.deleting = false;
-        state.clerics = state.clerics.filter(c => c.id !== action.payload);
+        state.monks = state.monks.filter((m) => m.id !== action.payload);
         if (state.total > 0) state.total -= 1;
-        if (state.currentCleric?.id === action.payload) {
-          state.currentCleric = null;
+        if (state.currentMonk?.id === action.payload) {
+          state.currentMonk = null;
         }
       })
-      .addCase(deleteCleric.rejected, (state, action) => {
+      .addCase(deleteMonk.rejected, (state, action) => {
         state.deleting = false;
         state.error = action.payload;
       });
   },
 });
 
-export const { clearCurrentCleric, clearError, setPage, setLimit, setTotal } = clericsSlice.actions;
-export default clericsSlice.reducer;
+export const { clearCurrentMonk, clearError, setPage, setLimit, setTotal } = monksSlice.actions;
+export default monksSlice.reducer;

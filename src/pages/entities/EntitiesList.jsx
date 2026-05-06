@@ -1,31 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, Badge, Button, Card, Input, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Avatar, Button, Card, Empty, Space, Table, Tag, Typography, message } from 'antd';
 import { DeleteOutlined, EditOutlined, EyeOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { Search } from 'lucide-react';
 import { deleteEntity, fetchEntities, setLimit, setPage } from '@/store/entitiesSlice';
+import CenteredLoader from '@/components/CenteredLoader';
+import { resolveMediaUrl } from '@/lib/mediaUrl';
 
-const { Title, Text } = Typography;
-const { Search } = Input;
-const { Option } = Select;
+const { Text, Title } = Typography;
 
-const categoryOptions = ['diocese', 'monastery', 'organization'];
-
-const EntitiesList = () => {
+export default function EntitiesList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
   const { entities, loading, deleting, error, page, limit, total } = useSelector((state) => state.entities);
 
   const [searchText, setSearchText] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState(null);
-  const previousFiltersRef = useRef({
-    searchDebounce: '',
-    categoryFilter: null,
-  });
+  const previousSearchRef = useRef('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -40,150 +34,86 @@ const EntitiesList = () => {
   }, [searchText]);
 
   useEffect(() => {
-    const filtersChanged =
-      previousFiltersRef.current.searchDebounce !== searchDebounce ||
-      previousFiltersRef.current.categoryFilter !== categoryFilter;
+    const searchChanged = previousSearchRef.current !== searchDebounce;
+    previousSearchRef.current = searchDebounce;
 
-    previousFiltersRef.current = { searchDebounce, categoryFilter };
-
-    if (filtersChanged && page !== 1) {
+    if (searchChanged && page !== 1) {
       dispatch(setPage(1));
       return;
     }
 
-    dispatch(
-      fetchEntities({
-        page,
-        limit,
-        search: searchDebounce,
-        category: categoryFilter,
-      })
-    );
-  }, [categoryFilter, dispatch, limit, page, searchDebounce]);
+    dispatch(fetchEntities({ page, limit, search: searchDebounce }));
+  }, [dispatch, page, limit, searchDebounce]);
 
   useEffect(() => {
     if (error) {
-      message.error(t('entities.fetchError'));
+      message.error(error?.message || error?.detail || t('entities.fetchError'));
     }
   }, [error, t]);
 
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'diocese':
-        return 'purple';
-      case 'monastery':
-        return 'gold';
-      case 'organization':
-        return 'cyan';
-      default:
-        return 'default';
-    }
-  };
-
-  const getCategoryText = (category) => {
-    switch (category) {
-      case 'diocese':
-        return t('entities.diocese');
-      case 'monastery':
-        return t('entities.monastery');
-      case 'organization':
-        return t('entities.organization');
-      default:
-        return category || t('common.notAvailable');
-    }
+  const getDisplayName = (entity) => {
+    return i18n.language === 'ar' && entity.name_ar ? entity.name_ar : entity.name;
   };
 
   const handleDelete = (entity) => {
-    Modal.confirm({
-      title: t('entities.deleteConfirm'),
-      content: t('entities.deleteConfirmMessage', {
-        name: entity?.name || entity?.slug || t('common.notAvailable'),
-      }),
-      okText: t('common.delete'),
-      okType: 'danger',
-      cancelText: t('common.cancel'),
-      onOk: async () => {
-        try {
-          await dispatch(deleteEntity(entity.id)).unwrap();
-          message.success(t('entities.deleteSuccess'));
-          dispatch(
-            fetchEntities({
-              page,
-              limit,
-              search: searchDebounce,
-              category: categoryFilter,
-            })
-          );
-        } catch (submitError) {
-          message.error(t('entities.deleteError'));
-        }
-      },
-    });
+    message.info(t('entities.deleteCascadeNotice'));
+    dispatch(deleteEntity(entity.id))
+      .unwrap()
+      .then(() => {
+        message.success(t('entities.deleteSuccess'));
+      })
+      .catch(() => {
+        message.error(t('entities.deleteError'));
+      });
   };
 
-  const entityStats = useMemo(() => {
-    const safeEntities = entities || [];
-    return {
-      activeCount: safeEntities.filter((entity) => entity?.isActive).length,
-      inactiveCount: safeEntities.filter((entity) => entity && !entity.isActive).length,
-      translationsMissing: safeEntities.filter((entity) => entity?.translation_missing).length,
-    };
-  }, [entities]);
-
   const columns = [
+    {
+      title: t('entities.thumbnail'),
+      dataIndex: 'thumbnail',
+      key: 'thumbnail',
+      width: 90,
+      render: (thumbnail, record) => (
+        <Avatar
+          shape="square"
+          size={52}
+          src={resolveMediaUrl(thumbnail)}
+          icon={<HomeOutlined />}
+          alt={getDisplayName(record)}
+        />
+      ),
+    },
     {
       title: t('entities.name'),
       dataIndex: 'name',
       key: 'name',
       render: (_, record) => (
-        <Space size={12}>
-          <Avatar shape="square" size={48} src={record.logo} icon={<HomeOutlined />} />
-          <div>
-            <Text
-              strong
-              style={{ display: 'block', fontSize: '16px', cursor: 'pointer' }}
-              onClick={() => navigate(`/entities/${record.slug}`)}
-            >
-              {record.name || record.slug || t('common.notAvailable')}
-            </Text>
-            <Text type="secondary">{record.slug || t('common.notAvailable')}</Text>
-          </div>
-        </Space>
+        <div>
+          <Text
+            strong
+            style={{ display: 'block', fontSize: '16px', cursor: 'pointer' }}
+            onClick={() => navigate(`/entities/${record.id}`)}
+          >
+            {getDisplayName(record) || t('common.notAvailable')}
+          </Text>
+          <Text type="secondary">#{record.id}</Text>
+        </div>
       ),
     },
     {
-      title: t('entities.category'),
-      dataIndex: 'category',
-      key: 'category',
-      render: (category) => (
-        <Tag color={getCategoryColor(category)} style={{ padding: '4px 12px', textTransform: 'capitalize' }}>
-          {getCategoryText(category)}
+      title: t('entities.childrenCount'),
+      dataIndex: 'childrenCount',
+      key: 'childrenCount',
+      render: (count) => count ?? 0,
+    },
+    {
+      title: t('entities.hasDetails'),
+      dataIndex: 'hasDetails',
+      key: 'hasDetails',
+      render: (hasDetails) => (
+        <Tag color={hasDetails ? 'success' : 'default'}>
+          {hasDetails ? t('common.yes') : t('common.no')}
         </Tag>
-      ),
-    },
-    {
-      title: t('entities.tags'),
-      dataIndex: 'tags',
-      key: 'tags',
-      render: (tags = []) =>
-        tags.length ? (
-          <Space size={[0, 8]} wrap>
-            {tags.map((tag) => (
-              <Tag key={tag.id} color="green">
-                {tag.name || tag.slug}
-              </Tag>
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">{t('entities.noTags')}</Text>
-        ),
-    },
-    {
-      title: t('entities.status'),
-      dataIndex: 'isActive',
-      key: 'isActive',
-      render: (isActive) => (
-        <Tag color={isActive ? 'green' : 'red'}>{isActive ? t('entities.active') : t('entities.inactive')}</Tag>
       ),
     },
     {
@@ -192,13 +122,13 @@ const EntitiesList = () => {
       width: 140,
       render: (_, record) => (
         <Space size="small">
-          <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`/entities/${record.slug}`)} />
-          <Button type="text" icon={<EditOutlined />} onClick={() => navigate(`/entities/${record.slug}/edit`)} />
+          <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`/entities/${record.id}`)} />
+          <Button type="text" icon={<EditOutlined />} onClick={() => navigate(`/entities/${record.id}/edit`)} />
           <Button
             type="text"
             danger
             icon={<DeleteOutlined />}
-            loading={deleting === record.id || deleting === true}
+            loading={deleting}
             onClick={() => handleDelete(record)}
           />
         </Space>
@@ -232,70 +162,58 @@ const EntitiesList = () => {
         </div>
 
         <div style={{ marginBottom: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          <Search
-            placeholder={t('entities.searchPlaceholder')}
-            allowClear
-            style={{ flex: 2, minWidth: 280 }}
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-          />
-          <Select
-            allowClear
-            placeholder={t('entities.filterByCategory')}
-            style={{ flex: 1, minWidth: 180 }}
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-          >
-            {categoryOptions.map((category) => (
-              <Option key={category} value={category}>
-                {getCategoryText(category)}
-              </Option>
-            ))}
-          </Select>
-          {(searchText || categoryFilter) && (
-            <Button
-              onClick={() => {
-                setSearchText('');
-                setCategoryFilter(null);
+          <div style={{ position: 'relative', flex: 1, minWidth: 280 }}>
+            <Search size={16} style={{ position: 'absolute', top: 11, left: 12, color: '#999', zIndex: 1 }} />
+            <input
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder={t('entities.searchPlaceholder')}
+              style={{
+                width: '100%',
+                height: 40,
+                padding: '0 12px 0 36px',
+                border: '1px solid #d9d9d9',
+                borderRadius: 6,
               }}
-            >
+            />
+          </div>
+          {searchText && (
+            <Button onClick={() => setSearchText('')}>
               {t('entities.clearFilters')}
             </Button>
           )}
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={entities}
-          rowKey={(record) => record.id}
-          loading={loading}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total,
-            onChange: (nextPage, nextLimit) => {
-              if (nextLimit !== limit) {
-                dispatch(setLimit(nextLimit));
-                return;
-              }
-              dispatch(setPage(nextPage));
-            },
-            showSizeChanger: true,
-          }}
-          rowClassName={(_, index) => (index % 2 === 0 ? 'table-row-light' : 'table-row-dark')}
-        />
+        {loading && !entities.length ? (
+          <CenteredLoader minHeight={320} />
+        ) : entities.length > 0 ? (
+          <Table
+            dataSource={entities.map((entity) => ({ ...entity, children: undefined }))}
+            columns={columns}
+            rowKey="id"
+            loading={loading || deleting}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total,
+              showSizeChanger: true,
+              onChange: (nextPage, nextLimit) => {
+                if (nextLimit !== limit) {
+                  dispatch(setLimit(nextLimit));
+                  return;
+                }
+                dispatch(setPage(nextPage));
+              },
+            }}
+          />
+        ) : (
+          <Empty description={t('common.empty')} image={Empty.PRESENTED_IMAGE_SIMPLE}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/entities/create')}>
+              {t('entities.create')}
+            </Button>
+          </Empty>
+        )}
       </Card>
-
-      <style>{`
-        .table-row-light {
-          background-color: #fafafa;
-        }
-        .table-row-dark {
-          background-color: #ffffff;
-        }
-      `}</style>
     </div>
   );
-};
-
-export default EntitiesList;
+}

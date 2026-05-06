@@ -9,6 +9,7 @@ import {
   Image,
   Input,
   Row,
+  Select,
   Space,
   Switch,
   Typography,
@@ -20,6 +21,7 @@ import { Church, ImageIcon } from 'lucide-react';
 import { clearCurrentSaint, createSaint, fetchSaint, updateSaint } from '@/store/saintsSlice';
 import Base64ImageUpload from '@/components/Base64ImageUpload';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
+import { getRankOptions } from '@/lib/ranks';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -37,6 +39,7 @@ export default function SaintForm() {
   const watchedFirstImage = Form.useWatch('first_image', form);
   const watchedSecondImage = Form.useWatch('second_image', form);
   const watchedHasDetails = Form.useWatch('hasDetails', form);
+  const rankOptions = getRankOptions(t);
 
   useEffect(() => {
     if (isEditMode) {
@@ -56,6 +59,7 @@ export default function SaintForm() {
     form.setFieldsValue({
       name: currentSaint.name || '',
       name_ar: currentSaint.name_ar || '',
+      rank: currentSaint.rank || undefined,
       image: currentSaint.image || '',
       description: currentSaint.description || '',
       hasDetails: currentSaint.hasDetails ?? false,
@@ -70,6 +74,7 @@ export default function SaintForm() {
     const payload = {
       name: values.name?.trim(),
       name_ar: values.name_ar?.trim(),
+      ...(values.rank ? { rank: values.rank } : {}),
       image: values.image || '',
       description: values.description?.trim() || '',
       hasDetails: values.hasDetails ?? false,
@@ -154,6 +159,23 @@ export default function SaintForm() {
                       ]}
                     >
                       <Input dir="rtl" placeholder={t('saints.nameArPlaceholder')} />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={t('saints.rank')}
+                      name="rank"
+                      rules={
+                        isEditMode
+                          ? []
+                          : [{ required: true, message: t('validation.required', { field: t('saints.rank') }) }]
+                      }
+                    >
+                      <Select
+                        placeholder={t('saints.selectRank')}
+                        options={rankOptions}
+                        allowClear={isEditMode}
+                      />
                     </Form.Item>
                   </Col>
                 </Row>

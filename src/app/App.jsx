@@ -22,13 +22,15 @@ import ArticlesList from '@/pages/articles/ArticlesList';
 import EntitiesList from '@/pages/entities/EntitiesList';
 import EntityDetail from '@/pages/entities/EntityDetail';
 import EntityForm from '@/pages/entities/EntityForm';
-import ClericsList from '@/pages/clerics/ClericsList';
-import ClericDetail from '@/pages/clerics/ClericDetail';
-import ClericForm from '@/pages/clerics/ClericForm';
+import MonksList from '@/pages/monks/MonksList';
+import MonkDetail from '@/pages/monks/MonkDetail';
+import MonkForm from '@/pages/monks/MonkForm';
 import SaintsList from '@/pages/saints/SaintsList';
 import SaintDetail from '@/pages/saints/SaintDetail';
 import SaintForm from '@/pages/saints/SaintForm';
 import SettingsPage from '@/pages/settings/SettingsPage';
+import HomePage from '@/pages/home/HomePage';
+import MonasteryPage from '@/pages/monastery/MonasteryPage';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import '@/styles/index.css';
 
@@ -114,7 +116,7 @@ export default function App() {
                         }
                       />
                       <Route
-                        path="entities/:slug"
+                        path="entities/:id"
                         element={
                           <ProtectedRoute requiredRole="Admin">
                             <EntityDetail />
@@ -122,10 +124,28 @@ export default function App() {
                         }
                       />
                       <Route
-                        path="entities/:slug/edit"
+                        path="entities/:id/edit"
                         element={
                           <ProtectedRoute requiredRole="Admin">
                             <EntityForm />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route
+                        path="home"
+                        element={
+                          <ProtectedRoute requiredRole="Admin">
+                            <HomePage />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route
+                        path="monastery"
+                        element={
+                          <ProtectedRoute requiredRole="Admin">
+                            <MonasteryPage />
                           </ProtectedRoute>
                         }
                       />
@@ -206,34 +226,34 @@ export default function App() {
                       />
 
                       <Route
-                        path="clerics"
+                        path="monks"
                         element={
                           <ProtectedRoute requiredRole="Admin">
-                            <ClericsList />
+                            <MonksList />
                           </ProtectedRoute>
                         }
                       />
                       <Route
-                        path="clerics/create"
+                        path="monks/create"
                         element={
                           <ProtectedRoute requiredRole="Admin">
-                            <ClericForm />
+                            <MonkForm />
                           </ProtectedRoute>
                         }
                       />
                       <Route
-                        path="clerics/:id"
+                        path="monks/:id"
                         element={
                           <ProtectedRoute requiredRole="Admin">
-                            <ClericDetail />
+                            <MonkDetail />
                           </ProtectedRoute>
                         }
                       />
                       <Route
-                        path="clerics/:id/edit"
+                        path="monks/:id/edit"
                         element={
                           <ProtectedRoute requiredRole="Admin">
-                            <ClericForm />
+                            <MonkForm />
                           </ProtectedRoute>
                         }
                       />

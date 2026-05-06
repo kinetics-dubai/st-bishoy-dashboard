@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { deleteSaint, fetchSaints, setSaintsLimit, setSaintsPage } from '@/store/saintsSlice';
 import CenteredLoader from '@/components/CenteredLoader';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
+import { getRankLabel } from '@/lib/ranks';
 
 const { Text } = Typography;
 
@@ -23,6 +24,10 @@ export default function SaintsList() {
 
   const getSaintName = (saint) => {
     return i18n.language === 'ar' && saint.name_ar ? saint.name_ar : saint.name;
+  };
+
+  const getSaintRank = (saint) => {
+    return saint.rank ? getRankLabel(t, saint.rank) : t('common.notAvailable');
   };
 
   const handleDelete = async (saint) => {
@@ -66,6 +71,13 @@ export default function SaintsList() {
           <Text type="secondary">{record.name || t('common.notAvailable')}</Text>
         </div>
       ),
+    },
+    {
+      title: t('saints.rank'),
+      dataIndex: 'rank',
+      key: 'rank',
+      width: 180,
+      render: (_, record) => getSaintRank(record),
     },
     {
       title: t('saints.hasDetails'),

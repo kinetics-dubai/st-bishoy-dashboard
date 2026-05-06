@@ -26,6 +26,7 @@ import {
   fetchSaint,
 } from "@/store/saintsSlice";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
+import { getRankLabel } from "@/lib/ranks";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -73,6 +74,9 @@ export default function SaintDetail() {
     i18n.language === "ar" && currentSaint?.name_ar
       ? currentSaint.name_ar
       : currentSaint?.name;
+  const saintRank = currentSaint?.rank
+    ? getRankLabel(t, currentSaint.rank)
+    : t("common.notAvailable");
 
   const handleDelete = () => {
     Modal.confirm({
@@ -155,6 +159,9 @@ export default function SaintDetail() {
                 </Descriptions.Item>
                 <Descriptions.Item label={t("saints.nameAr")}>
                   {currentSaint.name_ar || t("common.notAvailable")}
+                </Descriptions.Item>
+                <Descriptions.Item label={t("saints.rank")}>
+                  {saintRank}
                 </Descriptions.Item>
                 <Descriptions.Item label={t("saints.description")}>
                   {currentSaint.description || t("common.notAvailable")}
