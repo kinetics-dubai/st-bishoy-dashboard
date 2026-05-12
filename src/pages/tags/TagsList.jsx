@@ -193,7 +193,7 @@ const TagsList = () => {
         <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <TagOutlined style={{ color: '#5C1A1B' }} />
+              <TagOutlined style={{ color: '#6B1A1A' }} />
               {t('tags.title')}
             </Title>
           </div>
@@ -263,7 +263,7 @@ const TagsList = () => {
           background-color: #fafafa;
         }
         .table-row-dark {
-          background-color: #ffffff;
+          background-color: #F9F5EE;
         }
         .ant-table-tbody > tr:hover > td {
           background-color: #f5f5f5 !important;

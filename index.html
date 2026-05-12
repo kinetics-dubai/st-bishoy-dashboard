@@ -4,6 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/assets/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        try {
+          var persistedAuth = localStorage.getItem('persist:auth');
+          var direction = 'ltr';
+          var language = 'en';
+
+          var parseMaybeSerialized = function (value) {
+            if (typeof value !== 'string') return value;
+            try {
+              return JSON.parse(value);
+            } catch (_) {
+              return value.replace(/^"(.*)"$/, '$1');
+            }
+          };
+
+          if (persistedAuth) {
+            var parsed = JSON.parse(persistedAuth);
+            var parsedLanguage = parseMaybeSerialized(parsed && parsed.language);
+            var parsedDirection = parseMaybeSerialized(parsed && parsed.direction);
+
+            if (parsedLanguage === 'ar' || parsedLanguage === 'en') {
+              language = parsedLanguage;
+            }
+
+            if (parsedDirection === 'rtl' || parsedDirection === 'ltr') {
+              direction = parsedDirection;
+            } else {
+              direction = language === 'ar' ? 'rtl' : 'ltr';
+            }
+          }
+
+          document.dir = direction;
+          document.documentElement.setAttribute('dir', direction);
+          document.documentElement.lang = language;
+        } catch (e) {
+          document.dir = 'ltr';
+          document.documentElement.setAttribute('dir', 'ltr');
+          document.documentElement.lang = 'en';
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="./src/styles/index.css " />
     <title>St.Bishoy Monastery</title>
   </head>

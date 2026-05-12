@@ -151,7 +151,7 @@ export default function EntitiesList() {
         >
           <div>
             <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <HomeOutlined style={{ color: '#5C1A1B' }} />
+              <HomeOutlined style={{ color: '#6B1A1A' }} />
               {t('entities.title')}
             </Title>
           </div>

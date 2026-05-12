@@ -19,6 +19,7 @@ import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, HomeOutlined, PlusOutl
 import { useTranslation } from 'react-i18next';
 import { clearCurrentEntity, deleteEntity, fetchEntities, fetchEntity } from '@/store/entitiesSlice';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -81,8 +82,8 @@ export default function EntityDetail() {
           await dispatch(deleteEntity(currentEntity.id)).unwrap();
           message.success(t('entities.deleteSuccess'));
           navigate('/entities');
-        } catch {
-          message.error(t('entities.deleteError'));
+        } catch (err) {
+          message.error(getApiErrorMessage(err, t('entities.deleteError')));
         }
       },
     });

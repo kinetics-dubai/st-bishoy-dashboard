@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Button,
   Card,
   Col,
   Form,
-  Image,
   Input,
+  Menu,
   Row,
   Space,
   Spin,
@@ -16,7 +17,6 @@ import { HomeOutlined, SaveOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import apiService from "@/services/apiService";
 import Base64ImageUpload from "@/components/Base64ImageUpload";
-import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -158,42 +158,37 @@ function buildHomePayload(values) {
   };
 }
 
-function ImagePreview({ src, label, emptyLabel }) {
-  return (
-    <Card size="small" title={label}>
-      {src ? (
-        <Image
-          src={resolveMediaUrl(src)}
-          alt={label}
-          style={{
-            width: "100%",
-            maxHeight: 220,
-            objectFit: "cover",
-            borderRadius: 12,
-          }}
-          fallback=""
-        />
-      ) : (
-        <div style={{ minHeight: 160, display: "grid", placeItems: "center" }}>
-          <Text type="secondary">{emptyLabel}</Text>
-        </div>
-      )}
-    </Card>
-  );
-}
-
 export default function HomePage() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [homeId, setHomeId] = useState(DEFAULT_HOME.id);
   const [initialHome, setInitialHome] = useState(DEFAULT_HOME);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const watchedHeroImage = Form.useWatch("hero_image", form);
-  const watchedAboutImage = Form.useWatch("about_image", form);
-  const watchedStBishoyBioImage = Form.useWatch("st_bishoy_image", form);
-  const watchedMonasteryImage = Form.useWatch("monastery_image", form);
+  const SECTION_KEYS = [
+    "hero",
+    "spiritual_verse",
+    "about",
+    "st_bishoy_bio",
+    "monastery",
+    "area",
+    "papa",
+  ];
+
+  const activeSectionParam = searchParams.get("section");
+  const activeSection = SECTION_KEYS.includes(activeSectionParam)
+    ? activeSectionParam
+    : "hero";
+
+  const handleSelectSection = (key) => {
+    setSearchParams((prevParams) => {
+      const next = new URLSearchParams(prevParams);
+      next.set("section", key);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const fetchHome = async () => {
@@ -261,26 +256,18 @@ export default function HomePage() {
 
   return (
     <div style={{ padding: "24px" }}>
-      <Card>
-        <div
-          style={{
-            marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            flexWrap: "wrap",
-          }}
-        >
+      <Card style={{ borderRadius: 12 }}>
+        <div style={{ marginBottom: 16 }}>
           <Title
             level={2}
             style={{
               margin: 0,
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: 8,
             }}
           >
-            <HomeOutlined style={{ color: "#5C1A1B" }} />
+            <HomeOutlined style={{ color: "#6B1A1A" }} />
             {t("home.title")}
           </Title>
           <Text type="secondary">
@@ -294,467 +281,451 @@ export default function HomePage() {
           initialValues={DEFAULT_HOME}
           onFinish={handleSubmit}
         >
-          <Row gutter={[24, 0]}>
-            <Col xs={24} lg={16}>
-              <Card
-                size="small"
-                title={t("home.heroSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item name="hero_title" label={t("home.heroTitle")}>
-                      <Input placeholder={t("home.heroTitlePlaceholder")} />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_title_ar"
-                      label={t("home.heroTitleAr")}
-                    >
-                      <Input
-                        dir="rtl"
-                        placeholder={t("home.heroTitleArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item name="hero_text" label={t("home.heroText")}>
-                      <TextArea
-                        rows={4}
-                        placeholder={t("home.heroTextPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item name="hero_text_ar" label={t("home.heroTextAr")}>
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t("home.heroTextArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_cta_text"
-                      label={t("home.heroCtaText")}
-                    >
-                      <Input placeholder={t("home.heroCtaTextPlaceholder")} />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_cta_text_ar"
-                      label={t("home.heroCtaTextAr")}
-                    >
-                      <Input
-                        dir="rtl"
-                        placeholder={t("home.heroCtaTextArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Form.Item
-                  name="hero_cta_url"
-                  label={t("home.heroCtaUrl")}
-                  rules={[
-                    {
-                      type: "url",
-                      warningOnly: true,
-                      message: t("validation.url"),
-                    },
-                  ]}
-                >
-                  <Input placeholder={t("home.heroCtaUrlPlaceholder")} />
-                </Form.Item>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_description"
-                      label={t("home.heroMonasteryDescription")}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder={t(
-                          "home.heroMonasteryDescriptionPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_description_ar"
-                      label={t("home.heroMonasteryDescriptionAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t(
-                          "home.heroMonasteryDescriptionArPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_location"
-                      label={t("home.heroMonasteryLocation")}
-                    >
-                      <Input
-                        placeholder={t("home.heroMonasteryLocationPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_location_ar"
-                      label={t("home.heroMonasteryLocationAr")}
-                    >
-                      <Input
-                        dir="rtl"
-                        placeholder={t(
-                          "home.heroMonasteryLocationArPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_hours"
-                      label={t("home.heroMonasteryHours")}
-                    >
-                      <Input
-                        placeholder={t("home.heroMonasteryHoursPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="hero_monastery_hours_ar"
-                      label={t("home.heroMonasteryHoursAr")}
-                    >
-                      <Input
-                        dir="rtl"
-                        placeholder={t("home.heroMonasteryHoursArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Form.Item name="hero_image" label={t("home.heroImage")}>
-                  <Base64ImageUpload
-                    buttonLabel={t("home.uploadHeroImage")}
-                    emptyLabel={t("home.noImage")}
-                    removeLabel={t("home.removeImage")}
-                    errorLabel={t("home.imageProcessError")}
+          <Row gutter={[24, 24]}>
+            <Col xs={24} lg={6}>
+              <div style={{ position: "sticky", top: 16 }}>
+                <Card size="small" style={{ borderRadius: 12 }}>
+                  <Menu
+                    mode="inline"
+                    selectedKeys={[activeSection]}
+                    onClick={(e) => handleSelectSection(e.key)}
+                    items={[
+                      { key: "hero", label: t("home.heroSection") },
+                      {
+                        key: "spiritual_verse",
+                        label: t("home.spiritualVerseSection"),
+                      },
+                      { key: "about", label: t("home.aboutSection") },
+                      { key: "st_bishoy_bio", label: t("home.stBishoyBioSection") },
+                      { key: "monastery", label: t("home.monasterySection") },
+                      { key: "area", label: t("home.areaSection") },
+                      { key: "papa", label: t("home.papaSection") },
+                    ]}
                   />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("home.spiritualVerseSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="spiritual_verse_verse"
-                      label={t("home.spiritualVerseVerse")}
-                    >
-                      <TextArea
-                        rows={3}
-                        placeholder={t("home.spiritualVerseVersePlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="spiritual_verse_verse_ar"
-                      label={t("home.spiritualVerseVerseAr")}
-                    >
-                      <TextArea
-                        rows={3}
-                        dir="rtl"
-                        placeholder={t("home.spiritualVerseVerseArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="spiritual_verse_chapter"
-                      label={t("home.spiritualVerseChapter")}
-                    >
-                      <Input
-                        placeholder={t("home.spiritualVerseChapterPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="spiritual_verse_chapter_ar"
-                      label={t("home.spiritualVerseChapterAr")}
-                    >
-                      <Input
-                        dir="rtl"
-                        placeholder={t(
-                          "home.spiritualVerseChapterArPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("home.aboutSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item name="about_text" label={t("home.aboutText")}>
-                      <TextArea
-                        rows={4}
-                        placeholder={t("home.aboutTextPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="about_text_ar"
-                      label={t("home.aboutTextAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t("home.aboutTextArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Form.Item name="about_image" label={t("home.aboutImage")}>
-                  <Base64ImageUpload
-                    buttonLabel={t("home.uploadAboutImage")}
-                    emptyLabel={t("home.noImage")}
-                    removeLabel={t("home.removeImage")}
-                    errorLabel={t("home.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("home.stBishoyBioSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="st_bishoy_bio_description"
-                      label={t("home.stBishoyBioDescription")}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder={t(
-                          "home.stBishoyBioDescriptionPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="st_bishoy_bio_description_ar"
-                      label={t("home.stBishoyBioDescriptionAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t(
-                          "home.stBishoyBioDescriptionArPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Form.Item
-                  name="st_bishoy_image"
-                  label={t("home.stBishoyBioImage")}
-                >
-                  <Base64ImageUpload
-                    buttonLabel={t("home.uploadStBishoyBioImage")}
-                    emptyLabel={t("home.noImage")}
-                    removeLabel={t("home.removeImage")}
-                    errorLabel={t("home.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("home.monasterySection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="monastery_description"
-                      label={t("home.monasteryDescription")}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder={t("home.monasteryDescriptionPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="monastery_description_ar"
-                      label={t("home.monasteryDescriptionAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t(
-                          "home.monasteryDescriptionArPlaceholder",
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Form.Item
-                  name="monastery_image"
-                  label={t("home.monasteryImage")}
-                >
-                  <Base64ImageUpload
-                    buttonLabel={t("home.uploadMonasteryImage")}
-                    emptyLabel={t("home.noImage")}
-                    removeLabel={t("home.removeImage")}
-                    errorLabel={t("home.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("home.areaSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="area_description"
-                      label={t("home.areaDescription")}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder={t("home.areaDescriptionPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="area_description_ar"
-                      label={t("home.areaDescriptionAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t("home.areaDescriptionArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
-
-              <Card size="small" title={t("home.papaSection")}>
-                <Row gutter={16}>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="papa_description"
-                      label={t("home.papaDescription")}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder={t("home.papaDescriptionPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={12}>
-                    <Form.Item
-                      name="papa_description_ar"
-                      label={t("home.papaDescriptionAr")}
-                    >
-                      <TextArea
-                        rows={4}
-                        dir="rtl"
-                        placeholder={t("home.papaDescriptionArPlaceholder")}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
+                </Card>
+              </div>
             </Col>
 
-            <Col xs={24} lg={8}>
-              <Space
-                direction="vertical"
-                size="middle"
-                style={{ width: "100%" }}
+            <Col xs={24} lg={18}>
+              {activeSection === "hero" ? (
+                <Card size="small" title={t("home.heroSection")} style={{ borderRadius: 12 }}>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item name="hero_title" label={t("home.heroTitle")}>
+                        <Input placeholder={t("home.heroTitlePlaceholder")} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_title_ar"
+                        label={t("home.heroTitleAr")}
+                      >
+                        <Input
+                          dir="rtl"
+                          placeholder={t("home.heroTitleArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item name="hero_text" label={t("home.heroText")}>
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.heroTextPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item name="hero_text_ar" label={t("home.heroTextAr")}>
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.heroTextArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_cta_text"
+                        label={t("home.heroCtaText")}
+                      >
+                        <Input placeholder={t("home.heroCtaTextPlaceholder")} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_cta_text_ar"
+                        label={t("home.heroCtaTextAr")}
+                      >
+                        <Input
+                          dir="rtl"
+                          placeholder={t("home.heroCtaTextArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item
+                    name="hero_cta_url"
+                    label={t("home.heroCtaUrl")}
+                    rules={[
+                      {
+                        type: "url",
+                        warningOnly: true,
+                        message: t("validation.url"),
+                      },
+                    ]}
+                  >
+                    <Input placeholder={t("home.heroCtaUrlPlaceholder")} />
+                  </Form.Item>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_description"
+                        label={t("home.heroMonasteryDescription")}
+                      >
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.heroMonasteryDescriptionPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_description_ar"
+                        label={t("home.heroMonasteryDescriptionAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.heroMonasteryDescriptionArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_location"
+                        label={t("home.heroMonasteryLocation")}
+                      >
+                        <Input
+                          placeholder={t("home.heroMonasteryLocationPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_location_ar"
+                        label={t("home.heroMonasteryLocationAr")}
+                      >
+                        <Input
+                          dir="rtl"
+                          placeholder={t("home.heroMonasteryLocationArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_hours"
+                        label={t("home.heroMonasteryHours")}
+                      >
+                        <Input
+                          placeholder={t("home.heroMonasteryHoursPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="hero_monastery_hours_ar"
+                        label={t("home.heroMonasteryHoursAr")}
+                      >
+                        <Input
+                          dir="rtl"
+                          placeholder={t("home.heroMonasteryHoursArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item name="hero_image" label={t("home.heroImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("home.uploadHeroImage")}
+                      emptyLabel={t("home.noImage")}
+                      removeLabel={t("home.removeImage")}
+                      errorLabel={t("home.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "spiritual_verse" ? (
+                <Card
+                  size="small"
+                  title={t("home.spiritualVerseSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="spiritual_verse_verse"
+                        label={t("home.spiritualVerseVerse")}
+                      >
+                        <TextArea
+                          rows={3}
+                          placeholder={t("home.spiritualVerseVersePlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="spiritual_verse_verse_ar"
+                        label={t("home.spiritualVerseVerseAr")}
+                      >
+                        <TextArea
+                          rows={3}
+                          dir="rtl"
+                          placeholder={t("home.spiritualVerseVerseArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="spiritual_verse_chapter"
+                        label={t("home.spiritualVerseChapter")}
+                      >
+                        <Input
+                          placeholder={t("home.spiritualVerseChapterPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="spiritual_verse_chapter_ar"
+                        label={t("home.spiritualVerseChapterAr")}
+                      >
+                        <Input
+                          dir="rtl"
+                          placeholder={t("home.spiritualVerseChapterArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              ) : null}
+
+              {activeSection === "about" ? (
+                <Card size="small" title={t("home.aboutSection")} style={{ borderRadius: 12 }}>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item name="about_text" label={t("home.aboutText")}>
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.aboutTextPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="about_text_ar"
+                        label={t("home.aboutTextAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.aboutTextArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item name="about_image" label={t("home.aboutImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("home.uploadAboutImage")}
+                      emptyLabel={t("home.noImage")}
+                      removeLabel={t("home.removeImage")}
+                      errorLabel={t("home.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "st_bishoy_bio" ? (
+                <Card
+                  size="small"
+                  title={t("home.stBishoyBioSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="st_bishoy_bio_description"
+                        label={t("home.stBishoyBioDescription")}
+                      >
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.stBishoyBioDescriptionPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="st_bishoy_bio_description_ar"
+                        label={t("home.stBishoyBioDescriptionAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.stBishoyBioDescriptionArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item
+                    name="st_bishoy_image"
+                    label={t("home.stBishoyBioImage")}
+                  >
+                    <Base64ImageUpload
+                      buttonLabel={t("home.uploadStBishoyBioImage")}
+                      emptyLabel={t("home.noImage")}
+                      removeLabel={t("home.removeImage")}
+                      errorLabel={t("home.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "monastery" ? (
+                <Card
+                  size="small"
+                  title={t("home.monasterySection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="monastery_description"
+                        label={t("home.monasteryDescription")}
+                      >
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.monasteryDescriptionPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="monastery_description_ar"
+                        label={t("home.monasteryDescriptionAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.monasteryDescriptionArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item name="monastery_image" label={t("home.monasteryImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("home.uploadMonasteryImage")}
+                      emptyLabel={t("home.noImage")}
+                      removeLabel={t("home.removeImage")}
+                      errorLabel={t("home.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "area" ? (
+                <Card size="small" title={t("home.areaSection")} style={{ borderRadius: 12 }}>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="area_description"
+                        label={t("home.areaDescription")}
+                      >
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.areaDescriptionPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="area_description_ar"
+                        label={t("home.areaDescriptionAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.areaDescriptionArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              ) : null}
+
+              {activeSection === "papa" ? (
+                <Card size="small" title={t("home.papaSection")} style={{ borderRadius: 12 }}>
+                  <Row gutter={16}>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="papa_description"
+                        label={t("home.papaDescription")}
+                      >
+                        <TextArea
+                          rows={4}
+                          placeholder={t("home.papaDescriptionPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                      <Form.Item
+                        name="papa_description_ar"
+                        label={t("home.papaDescriptionAr")}
+                      >
+                        <TextArea
+                          rows={4}
+                          dir="rtl"
+                          placeholder={t("home.papaDescriptionArPlaceholder")}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              ) : null}
+
+              <div
+                style={{
+                  position: "sticky",
+                  bottom: 0,
+                  marginTop: 16,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  background:
+                    "linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0))",
+                }}
               >
-                <ImagePreview
-                  src={watchedHeroImage}
-                  label={t("home.heroImage")}
-                  emptyLabel={t("home.noImage")}
-                />
-                <ImagePreview
-                  src={watchedAboutImage}
-                  label={t("home.aboutImage")}
-                  emptyLabel={t("home.noImage")}
-                />
-                <ImagePreview
-                  src={watchedStBishoyBioImage}
-                  label={t("home.stBishoyBioImage")}
-                  emptyLabel={t("home.noImage")}
-                />
-                <ImagePreview
-                  src={watchedMonasteryImage}
-                  label={t("home.monasteryImage")}
-                  emptyLabel={t("home.noImage")}
-                />
-              </Space>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SaveOutlined />}
+                    loading={saving}
+                    style={{ minWidth: 160, background: "#6B1A1A" }}
+                  >
+                    {t("common.save")}
+                  </Button>
+                </div>
+              </div>
             </Col>
           </Row>
-
-          <div
-            style={{
-              marginTop: "32px",
-              paddingTop: "24px",
-              borderTop: "1px solid #f0f0f0",
-            }}
-          >
-            <Space size="large">
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<SaveOutlined />}
-                loading={saving}
-                size="large"
-              >
-                {t("common.save")}
-              </Button>
-            </Space>
-          </div>
         </Form>
       </Card>
     </div>

@@ -8,6 +8,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { setRedirectAfterLogin } from '@/store/authSlice';
 import apiService from '@/services/apiService';
 import logo from '/assets/logo.png';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const { Title, Text } = Typography;
 
@@ -43,7 +44,7 @@ export default function LoginPage() {
       navigate(destination, { replace: true });
       
     } catch (error) {
-      message.error(t('login.loginFailed') + (error.response?.data?.message || error.message));
+      message.error(getApiErrorMessage(error, t('login.loginFailed')));
     } finally {
       setLoading(false);
     }

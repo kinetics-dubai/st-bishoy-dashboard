@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Button,
   Card,
   Col,
   Divider,
   Form,
-  Image,
   Input,
+  Menu,
   Row,
   Space,
   Spin,
@@ -22,16 +23,20 @@ import {
 import { useTranslation } from "react-i18next";
 import apiService from "@/services/apiService";
 import Base64ImageUpload from "@/components/Base64ImageUpload";
-import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const HISTORY_ITEM_SHAPE = {
-  title: "",
-  title_ar: "",
-  content: "",
-  content_ar: "",
+  date: "",
+  date_ar: "",
+  text: "",
+  text_ar: "",
+};
+
+const MYRON_TIMELINE_ITEM_SHAPE = {
+  date: "",
+  text: "",
 };
 
 const DEVELOPMENT_IMAGE_SHAPE = {
@@ -88,6 +93,34 @@ function normalizeList(items, shape) {
   );
 }
 
+function coerceToArray(value) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === "object" && Array.isArray(value.content)) {
+    return value.content;
+  }
+  if (value && typeof value === "object" && Array.isArray(value.timeline)) {
+    return value.timeline;
+  }
+  return [];
+}
+
+function normalizeLegacyTimeline(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === "object") {
+    const text = normalizeText(value.text ?? "");
+    const text_ar = normalizeText(value.text_ar ?? "");
+    if (!text && !text_ar) return [];
+    return [{ ...HISTORY_ITEM_SHAPE, text, text_ar }];
+  }
+  if (typeof value === "string") {
+    const text = normalizeText(value);
+    if (!text) return [];
+    return [{ ...HISTORY_ITEM_SHAPE, text }];
+  }
+  return [];
+}
+
 function normalizeMonastery(payload) {
   const rawMonastery = payload?.data ?? payload ?? {};
   const cover = rawMonastery.cover ?? {};
@@ -98,6 +131,14 @@ function normalizeMonastery(payload) {
   const papal = rawMonastery.papal ?? {};
   const myron = rawMonastery.myron ?? {};
   const history = rawMonastery.history ?? {};
+
+  const historySource =
+    rawMonastery.monastery_history ??
+    (Array.isArray(rawMonastery.history) ? rawMonastery.history : null) ??
+    history.content;
+  const myronTimelineSource =
+    rawMonastery.myron_timeline ??
+    myron.timeline;
 
   return {
     ...DEFAULT_MONASTERY,
@@ -154,12 +195,14 @@ function normalizeMonastery(payload) {
       rawMonastery.myron_description_ar ?? myron.description_ar,
     ),
     monastery_history: normalizeList(
-      rawMonastery.monastery_history ?? history.content,
+      coerceToArray(historySource),
       HISTORY_ITEM_SHAPE,
     ),
     myron_timeline: normalizeList(
-      rawMonastery.myron_timeline ?? myron.timeline,
-      HISTORY_ITEM_SHAPE,
+      coerceToArray(myronTimelineSource).length
+        ? coerceToArray(myronTimelineSource)
+        : normalizeLegacyTimeline(myronTimelineSource),
+      MYRON_TIMELINE_ITEM_SHAPE,
     ),
     monastery_development_images: normalizeList(
       rawMonastery.monastery_development_images,
@@ -168,7 +211,7 @@ function normalizeMonastery(payload) {
   };
 }
 
-function buildMonasteryPayload(values) {
+function buildMonasterySnapshot(values) {
   return {
     cover_image: normalizeOptionalValue(values.cover_image),
     about_description: normalizeText(values.about_description),
@@ -194,7 +237,7 @@ function buildMonasteryPayload(values) {
     myron_description: normalizeText(values.myron_description),
     myron_description_ar: normalizeText(values.myron_description_ar),
     monastery_history: normalizeList(values.monastery_history, HISTORY_ITEM_SHAPE),
-    myron_timeline: normalizeList(values.myron_timeline, HISTORY_ITEM_SHAPE),
+    myron_timeline: normalizeList(values.myron_timeline, MYRON_TIMELINE_ITEM_SHAPE),
     monastery_development_images: normalizeList(
       values.monastery_development_images,
       DEVELOPMENT_IMAGE_SHAPE,
@@ -202,37 +245,15 @@ function buildMonasteryPayload(values) {
   };
 }
 
-function ImagePreview({ src, label, emptyLabel }) {
-  return (
-    <Card size="small" title={label}>
-      {src ? (
-        <Image
-          src={resolveMediaUrl(src)}
-          alt={label}
-          style={{
-            width: "100%",
-            maxHeight: 220,
-            objectFit: "cover",
-            borderRadius: 12,
-          }}
-          fallback=""
-        />
-      ) : (
-        <div style={{ minHeight: 160, display: "grid", placeItems: "center" }}>
-          <Text type="secondary">{emptyLabel}</Text>
-        </div>
-      )}
-    </Card>
-  );
-}
-
 function BilingualTextFields({
   leftName,
   leftLabel,
   leftPlaceholder,
+  leftRules,
   rightName,
   rightLabel,
   rightPlaceholder,
+  rightRules,
   rows = 4,
   textarea = false,
 }) {
@@ -241,12 +262,12 @@ function BilingualTextFields({
   return (
     <Row gutter={16}>
       <Col xs={24} md={12}>
-        <Form.Item name={leftName} label={leftLabel}>
+        <Form.Item name={leftName} label={leftLabel} rules={leftRules}>
           <Component rows={textarea ? rows : undefined} placeholder={leftPlaceholder} />
         </Form.Item>
       </Col>
       <Col xs={24} md={12}>
-        <Form.Item name={rightName} label={rightLabel}>
+        <Form.Item name={rightName} label={rightLabel} rules={rightRules}>
           <Component
             rows={textarea ? rows : undefined}
             dir="rtl"
@@ -311,23 +332,69 @@ function HistoryList({ t, name, titleKey, addLabelKey }) {
               }
             >
               <BilingualTextFields
-                leftName={[field.name, "title"]}
-                leftLabel={t("monastery.rowTitle")}
-                leftPlaceholder={t("monastery.rowTitlePlaceholder")}
-                rightName={[field.name, "title_ar"]}
-                rightLabel={t("monastery.rowTitleAr")}
-                rightPlaceholder={t("monastery.rowTitleArPlaceholder")}
+                leftName={[field.name, "date"]}
+                leftLabel={t("monastery.rowDate")}
+                leftPlaceholder={t("monastery.rowDatePlaceholder")}
+                rightName={[field.name, "date_ar"]}
+                rightLabel={t("monastery.rowDateAr")}
+                rightPlaceholder={t("monastery.rowDateArPlaceholder")}
               />
               <BilingualTextFields
-                leftName={[field.name, "content"]}
-                leftLabel={t("monastery.rowContent")}
-                leftPlaceholder={t("monastery.rowContentPlaceholder")}
-                rightName={[field.name, "content_ar"]}
-                rightLabel={t("monastery.rowContentAr")}
-                rightPlaceholder={t("monastery.rowContentArPlaceholder")}
+                leftName={[field.name, "text"]}
+                leftLabel={t("monastery.rowText")}
+                leftPlaceholder={t("monastery.rowTextPlaceholder")}
+                rightName={[field.name, "text_ar"]}
+                rightLabel={t("monastery.rowTextAr")}
+                rightPlaceholder={t("monastery.rowTextArPlaceholder")}
                 textarea
                 rows={5}
               />
+            </Card>
+          ))}
+        </>
+      )}
+    </Form.List>
+  );
+}
+
+function MyronTimelineList({ t }) {
+  return (
+    <Form.List name="myron_timeline">
+      {(fields, { add, remove }) => (
+        <>
+          <RepeaterHeader
+            title={t("monastery.myronTimeline")}
+            addLabel={t("monastery.addTimelineItem")}
+            onAdd={() => add({ ...MYRON_TIMELINE_ITEM_SHAPE })}
+          />
+
+          {!fields.length ? (
+            <Text type="secondary">{t("monastery.emptyRows")}</Text>
+          ) : null}
+
+          {fields.map((field, index) => (
+            <Card
+              key={field.key}
+              size="small"
+              style={{ marginBottom: 16 }}
+              title={`${t("monastery.entry")} ${index + 1}`}
+              extra={
+                <Button
+                  danger
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  onClick={() => remove(field.name)}
+                >
+                  {t("monastery.removeRow")}
+                </Button>
+              }
+            >
+              <Form.Item name={[field.name, "date"]} label={t("monastery.rowDate")}>
+                <Input dir="rtl" placeholder={t("monastery.rowDatePlaceholder")} />
+              </Form.Item>
+              <Form.Item name={[field.name, "text"]} label={t("monastery.rowText")}>
+                <TextArea rows={4} dir="rtl" placeholder={t("monastery.rowTextPlaceholder")} />
+              </Form.Item>
             </Card>
           ))}
         </>
@@ -369,7 +436,7 @@ function DevelopmentImagesList({ t }) {
               }
             >
               <Row gutter={[16, 16]}>
-                <Col xs={24} lg={14}>
+                <Col xs={24}>
                   <Form.Item
                     name={[field.name, "image"]}
                     label={t("monastery.developmentImage")}
@@ -385,31 +452,12 @@ function DevelopmentImagesList({ t }) {
                     leftName={[field.name, "caption"]}
                     leftLabel={t("monastery.caption")}
                     leftPlaceholder={t("monastery.captionPlaceholder")}
+                    leftRules={[{ required: true, message: t("validation.required") }]}
                     rightName={[field.name, "caption_ar"]}
                     rightLabel={t("monastery.captionAr")}
                     rightPlaceholder={t("monastery.captionArPlaceholder")}
+                    rightRules={[{ required: true, message: t("validation.required") }]}
                   />
-                </Col>
-                <Col xs={24} lg={10}>
-                  <Form.Item
-                    noStyle
-                    shouldUpdate={(prevValues, nextValues) =>
-                      prevValues?.monastery_development_images?.[field.name]?.image !==
-                      nextValues?.monastery_development_images?.[field.name]?.image
-                    }
-                  >
-                    {({ getFieldValue }) => (
-                      <ImagePreview
-                        src={getFieldValue([
-                          "monastery_development_images",
-                          field.name,
-                          "image",
-                        ])}
-                        label={t("monastery.developmentImagePreview")}
-                        emptyLabel={t("monastery.noImage")}
-                      />
-                    )}
-                  </Form.Item>
                 </Col>
               </Row>
             </Card>
@@ -423,16 +471,54 @@ function DevelopmentImagesList({ t }) {
 export default function MonasteryPage() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [monasteryId, setMonasteryId] = useState(DEFAULT_MONASTERY.id);
   const [initialMonastery, setInitialMonastery] = useState(DEFAULT_MONASTERY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const watchedCoverImage = Form.useWatch("cover_image", form);
-  const watchedAboutImage = Form.useWatch("about_image", form);
-  const watchedWallImage = Form.useWatch("monastery_wall_image", form);
-  const watchedCatacombImage = Form.useWatch("catacomb_image", form);
-  const watchedPapalImage = Form.useWatch("papal_image", form);
+  const SECTION_KEYS = [
+    "cover",
+    "about",
+    "wall",
+    "catacomb",
+    "development",
+    "history",
+    "papal",
+    "myron",
+  ];
+
+  const activeSectionParam = searchParams.get("section");
+  const activeSection = SECTION_KEYS.includes(activeSectionParam)
+    ? activeSectionParam
+    : "cover";
+
+  const SECTION_FIELDS = {
+    cover: ["cover_image"],
+    about: ["about_description", "about_description_ar", "about_image"],
+    wall: [
+      "monastery_wall_description",
+      "monastery_wall_description_ar",
+      "monastery_wall_image",
+    ],
+    catacomb: ["catacomb_description", "catacomb_description_ar", "catacomb_image"],
+    development: [
+      "monastery_development_description",
+      "monastery_development_description_ar",
+      "monastery_development_images",
+    ],
+    history: ["monastery_history"],
+    papal: ["papal_description", "papal_description_ar", "papal_image"],
+    myron: ["myron_description", "myron_description_ar", "myron_timeline"],
+  };
+
+  const handleSelectSection = (key) => {
+    setSearchParams((prevParams) => {
+      const next = new URLSearchParams(prevParams);
+      next.set("section", key);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const fetchMonastery = async () => {
@@ -457,13 +543,44 @@ export default function MonasteryPage() {
     fetchMonastery();
   }, [form, t]);
 
+  const applyBackendValidationErrors = (details) => {
+    if (!Array.isArray(details) || !details.length) return false;
+
+    const toNamePath = (field) =>
+      String(field)
+        .split(".")
+        .filter(Boolean)
+        .map((part) => (part.match(/^\d+$/) ? Number(part) : part));
+
+    form.setFields(
+      details
+        .filter((item) => item?.field)
+        .map((item) => ({
+          name: toNamePath(item.field),
+          errors: [String(item?.message || t("common.error"))],
+        })),
+    );
+
+    return true;
+  };
+
   const handleSubmit = async (values) => {
     try {
       setSaving(true);
-      const nextValues = buildMonasteryPayload(values);
+      form.setFields(
+        form
+          .getFieldsError()
+          .filter((f) => f.errors?.length)
+          .map((f) => ({ name: f.name, errors: [] })),
+      );
+
+      const nextValues = buildMonasterySnapshot(values);
       const payload = {};
+      const sectionFields = SECTION_FIELDS[activeSection] ?? [];
 
       for (const [key, value] of Object.entries(nextValues)) {
+        if (!sectionFields.includes(key)) continue;
+
         const previousValue = initialMonastery[key];
         const isArrayField = Array.isArray(value);
         const hasChanged = isArrayField
@@ -492,6 +609,12 @@ export default function MonasteryPage() {
       form.setFieldsValue(normalizedMonastery);
       message.success(t("monastery.saveSuccess"));
     } catch (error) {
+      const details = error?.details || error?.response?.data?.details;
+      if (applyBackendValidationErrors(details)) {
+        message.error(error?.error || error?.response?.data?.error || t("monastery.saveError"));
+        return;
+      }
+
       message.error(
         error?.response?.data?.message || error?.message || t("monastery.saveError"),
       );
@@ -510,26 +633,18 @@ export default function MonasteryPage() {
 
   return (
     <div style={{ padding: "24px" }}>
-      <Card>
-        <div
-          style={{
-            marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            flexWrap: "wrap",
-          }}
-        >
+      <Card style={{ borderRadius: 12 }}>
+        <div style={{ marginBottom: 16 }}>
           <Title
             level={2}
             style={{
               margin: 0,
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: 8,
             }}
           >
-            <AppstoreOutlined style={{ color: "#5C1A1B" }} />
+            <AppstoreOutlined style={{ color: "#6B1A1A" }} />
             {t("monastery.title")}
           </Title>
           <Text type="secondary">
@@ -543,226 +658,249 @@ export default function MonasteryPage() {
           initialValues={DEFAULT_MONASTERY}
           onFinish={handleSubmit}
         >
-          <Row gutter={[24, 0]}>
-            <Col xs={24} lg={16}>
-              <Card
-                size="small"
-                title={t("monastery.coverSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <Form.Item name="cover_image" label={t("monastery.coverImage")}>
-                  <Base64ImageUpload
-                    buttonLabel={t("monastery.uploadCoverImage")}
-                    emptyLabel={t("monastery.noImage")}
-                    removeLabel={t("monastery.removeImage")}
-                    errorLabel={t("monastery.imageProcessError")}
+          <Row gutter={[24, 24]}>
+            <Col xs={24} lg={6}>
+              <div style={{ position: "sticky", top: 16 }}>
+                <Card size="small" style={{ borderRadius: 12 }}>
+                  <Menu
+                    mode="inline"
+                    selectedKeys={[activeSection]}
+                    onClick={(e) => handleSelectSection(e.key)}
+                    items={[
+                      { key: "cover", label: t("monastery.coverSection") },
+                      { key: "about", label: t("monastery.aboutSection") },
+                      { key: "wall", label: t("monastery.wallSection") },
+                      { key: "catacomb", label: t("monastery.catacombSection") },
+                      { key: "development", label: t("monastery.developmentSection") },
+                      { key: "history", label: t("monastery.historySection") },
+                      { key: "papal", label: t("monastery.papalSection") },
+                      { key: "myron", label: t("monastery.myronSection") },
+                    ]}
                   />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.aboutSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <BilingualTextFields
-                  leftName="about_description"
-                  leftLabel={t("monastery.aboutDescription")}
-                  leftPlaceholder={t("monastery.aboutDescriptionPlaceholder")}
-                  rightName="about_description_ar"
-                  rightLabel={t("monastery.aboutDescriptionAr")}
-                  rightPlaceholder={t("monastery.aboutDescriptionArPlaceholder")}
-                  textarea
-                  rows={5}
-                />
-                <Form.Item name="about_image" label={t("monastery.aboutImage")}>
-                  <Base64ImageUpload
-                    buttonLabel={t("monastery.uploadAboutImage")}
-                    emptyLabel={t("monastery.noImage")}
-                    removeLabel={t("monastery.removeImage")}
-                    errorLabel={t("monastery.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.wallSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <BilingualTextFields
-                  leftName="monastery_wall_description"
-                  leftLabel={t("monastery.wallDescription")}
-                  leftPlaceholder={t("monastery.wallDescriptionPlaceholder")}
-                  rightName="monastery_wall_description_ar"
-                  rightLabel={t("monastery.wallDescriptionAr")}
-                  rightPlaceholder={t("monastery.wallDescriptionArPlaceholder")}
-                  textarea
-                  rows={5}
-                />
-                <Form.Item
-                  name="monastery_wall_image"
-                  label={t("monastery.wallImage")}
-                >
-                  <Base64ImageUpload
-                    buttonLabel={t("monastery.uploadWallImage")}
-                    emptyLabel={t("monastery.noImage")}
-                    removeLabel={t("monastery.removeImage")}
-                    errorLabel={t("monastery.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.catacombSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <BilingualTextFields
-                  leftName="catacomb_description"
-                  leftLabel={t("monastery.catacombDescription")}
-                  leftPlaceholder={t("monastery.catacombDescriptionPlaceholder")}
-                  rightName="catacomb_description_ar"
-                  rightLabel={t("monastery.catacombDescriptionAr")}
-                  rightPlaceholder={t("monastery.catacombDescriptionArPlaceholder")}
-                  textarea
-                  rows={5}
-                />
-                <Form.Item
-                  name="catacomb_image"
-                  label={t("monastery.catacombImage")}
-                >
-                  <Base64ImageUpload
-                    buttonLabel={t("monastery.uploadCatacombImage")}
-                    emptyLabel={t("monastery.noImage")}
-                    removeLabel={t("monastery.removeImage")}
-                    errorLabel={t("monastery.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.developmentSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <BilingualTextFields
-                  leftName="monastery_development_description"
-                  leftLabel={t("monastery.developmentDescription")}
-                  leftPlaceholder={t("monastery.developmentDescriptionPlaceholder")}
-                  rightName="monastery_development_description_ar"
-                  rightLabel={t("monastery.developmentDescriptionAr")}
-                  rightPlaceholder={t(
-                    "monastery.developmentDescriptionArPlaceholder",
-                  )}
-                  textarea
-                  rows={5}
-                />
-                <Divider />
-                <DevelopmentImagesList t={t} />
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.historySection")}
-                style={{ marginBottom: 24 }}
-              >
-                <HistoryList
-                  t={t}
-                  name="monastery_history"
-                  titleKey="monastery.historyRows"
-                  addLabelKey="monastery.addHistoryItem"
-                />
-              </Card>
-
-              <Card
-                size="small"
-                title={t("monastery.papalSection")}
-                style={{ marginBottom: 24 }}
-              >
-                <BilingualTextFields
-                  leftName="papal_description"
-                  leftLabel={t("monastery.papalDescription")}
-                  leftPlaceholder={t("monastery.papalDescriptionPlaceholder")}
-                  rightName="papal_description_ar"
-                  rightLabel={t("monastery.papalDescriptionAr")}
-                  rightPlaceholder={t("monastery.papalDescriptionArPlaceholder")}
-                  textarea
-                  rows={5}
-                />
-                <Form.Item name="papal_image" label={t("monastery.papalImage")}>
-                  <Base64ImageUpload
-                    buttonLabel={t("monastery.uploadPapalImage")}
-                    emptyLabel={t("monastery.noImage")}
-                    removeLabel={t("monastery.removeImage")}
-                    errorLabel={t("monastery.imageProcessError")}
-                  />
-                </Form.Item>
-              </Card>
-
-              <Card size="small" title={t("monastery.myronSection")}>
-                <BilingualTextFields
-                  leftName="myron_description"
-                  leftLabel={t("monastery.myronDescription")}
-                  leftPlaceholder={t("monastery.myronDescriptionPlaceholder")}
-                  rightName="myron_description_ar"
-                  rightLabel={t("monastery.myronDescriptionAr")}
-                  rightPlaceholder={t("monastery.myronDescriptionArPlaceholder")}
-                  textarea
-                  rows={5}
-                />
-                <Divider />
-                <HistoryList
-                  t={t}
-                  name="myron_timeline"
-                  titleKey="monastery.myronTimeline"
-                  addLabelKey="monastery.addTimelineItem"
-                />
-              </Card>
+                </Card>
+              </div>
             </Col>
 
-            <Col xs={24} lg={8}>
-              <Space direction="vertical" size={16} style={{ width: "100%" }}>
-                <ImagePreview
-                  src={watchedCoverImage}
-                  label={t("monastery.coverImage")}
-                  emptyLabel={t("monastery.noImage")}
-                />
-                <ImagePreview
-                  src={watchedAboutImage}
-                  label={t("monastery.aboutImage")}
-                  emptyLabel={t("monastery.noImage")}
-                />
-                <ImagePreview
-                  src={watchedWallImage}
-                  label={t("monastery.wallImage")}
-                  emptyLabel={t("monastery.noImage")}
-                />
-                <ImagePreview
-                  src={watchedCatacombImage}
-                  label={t("monastery.catacombImage")}
-                  emptyLabel={t("monastery.noImage")}
-                />
-                <ImagePreview
-                  src={watchedPapalImage}
-                  label={t("monastery.papalImage")}
-                  emptyLabel={t("monastery.noImage")}
-                />
-              </Space>
+            <Col xs={24} lg={18}>
+              {activeSection === "cover" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.coverSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <Form.Item name="cover_image" label={t("monastery.coverImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadCoverImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "about" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.aboutSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="about_description"
+                    leftLabel={t("monastery.aboutDescription")}
+                    leftPlaceholder={t("monastery.aboutDescriptionPlaceholder")}
+                    rightName="about_description_ar"
+                    rightLabel={t("monastery.aboutDescriptionAr")}
+                    rightPlaceholder={t("monastery.aboutDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Form.Item name="about_image" label={t("monastery.aboutImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadAboutImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "wall" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.wallSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="monastery_wall_description"
+                    leftLabel={t("monastery.wallDescription")}
+                    leftPlaceholder={t("monastery.wallDescriptionPlaceholder")}
+                    rightName="monastery_wall_description_ar"
+                    rightLabel={t("monastery.wallDescriptionAr")}
+                    rightPlaceholder={t("monastery.wallDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Form.Item
+                    name="monastery_wall_image"
+                    label={t("monastery.wallImage")}
+                  >
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadWallImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "catacomb" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.catacombSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="catacomb_description"
+                    leftLabel={t("monastery.catacombDescription")}
+                    leftPlaceholder={t("monastery.catacombDescriptionPlaceholder")}
+                    rightName="catacomb_description_ar"
+                    rightLabel={t("monastery.catacombDescriptionAr")}
+                    rightPlaceholder={t("monastery.catacombDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Form.Item
+                    name="catacomb_image"
+                    label={t("monastery.catacombImage")}
+                  >
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadCatacombImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "development" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.developmentSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="monastery_development_description"
+                    leftLabel={t("monastery.developmentDescription")}
+                    leftPlaceholder={t("monastery.developmentDescriptionPlaceholder")}
+                    rightName="monastery_development_description_ar"
+                    rightLabel={t("monastery.developmentDescriptionAr")}
+                    rightPlaceholder={t("monastery.developmentDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Divider />
+                  <DevelopmentImagesList t={t} />
+                </Card>
+              ) : null}
+
+              {activeSection === "history" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.historySection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <HistoryList
+                    t={t}
+                    name="monastery_history"
+                    titleKey="monastery.historyRows"
+                    addLabelKey="monastery.addHistoryItem"
+                  />
+                </Card>
+              ) : null}
+
+              {activeSection === "papal" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.papalSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="papal_description"
+                    leftLabel={t("monastery.papalDescription")}
+                    leftPlaceholder={t("monastery.papalDescriptionPlaceholder")}
+                    rightName="papal_description_ar"
+                    rightLabel={t("monastery.papalDescriptionAr")}
+                    rightPlaceholder={t("monastery.papalDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Form.Item name="papal_image" label={t("monastery.papalImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadPapalImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
+                </Card>
+              ) : null}
+
+              {activeSection === "myron" ? (
+                <Card
+                  size="small"
+                  title={t("monastery.myronSection")}
+                  style={{ borderRadius: 12 }}
+                >
+                  <BilingualTextFields
+                    leftName="myron_description"
+                    leftLabel={t("monastery.myronDescription")}
+                    leftPlaceholder={t("monastery.myronDescriptionPlaceholder")}
+                    rightName="myron_description_ar"
+                    rightLabel={t("monastery.myronDescriptionAr")}
+                    rightPlaceholder={t("monastery.myronDescriptionArPlaceholder")}
+                    textarea
+                    rows={5}
+                  />
+                  <Divider />
+                  <MyronTimelineList t={t} />
+                </Card>
+              ) : null}
+
+              <div
+                style={{
+                  position: "sticky",
+                  bottom: 0,
+                  marginTop: 16,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  background:
+                    "linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0))",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 12,
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SaveOutlined />}
+                    loading={saving}
+                    style={{ minWidth: 160, background: "#6B1A1A" }}
+                  >
+                    {t("common.save")}
+                  </Button>
+                </div>
+              </div>
             </Col>
           </Row>
-
-          <div style={{ marginTop: 24 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              icon={<SaveOutlined />}
-              loading={saving}
-              style={{ minWidth: 160 }}
-            >
-              {t("common.save")}
-            </Button>
-          </div>
         </Form>
       </Card>
     </div>

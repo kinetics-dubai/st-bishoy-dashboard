@@ -5,6 +5,7 @@ import { Card, Tag, Button, Space, Descriptions, Typography, message, Spin, Avat
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, UserOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { fetchUser, deleteUser } from '@/store/usersSlice';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const { Title, Paragraph } = Typography;
 
@@ -41,7 +42,7 @@ const UserDetail = () => {
           message.success(t('users.deleteSuccess'));
           navigate('/users');
         } catch (error) {
-          message.error(t('users.deleteError'));
+          message.error(getApiErrorMessage(error, t('users.deleteError')));
         }
       },
     });

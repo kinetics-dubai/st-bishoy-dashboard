@@ -5,6 +5,7 @@ import { Button, Card, Empty, Modal, Space, Spin, Tag, Typography, message } fro
 import { ArrowLeftOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { clearCurrentTag, deleteTag, fetchTag } from '@/store/tagsSlice';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const { Title, Text } = Typography;
 
@@ -56,7 +57,7 @@ const TagDetail = () => {
           message.success(t('tags.deleteSuccess'));
           navigate('/tags');
         } catch (error) {
-          message.error(t('tags.deleteError'));
+          message.error(getApiErrorMessage(error, t('tags.deleteError')));
         }
       },
     });
@@ -91,7 +92,7 @@ const TagDetail = () => {
                   {t('common.back')}
                 </Button>
                 <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TagOutlined style={{ color: '#5C1A1B' }} />
+                  <TagOutlined style={{ color: '#6B1A1A' }} />
                   {currentTranslation?.name || baseTag?.slug || t('tags.title')}
                 </Title>
               </Space>

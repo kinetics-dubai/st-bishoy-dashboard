@@ -1,0 +1,57 @@
+{
+  "cover_image": "header.png",
+
+  "about_description": "St. Bishoy Monastery is one of the oldest Coptic Orthodox monasteries in Egypt, located in Wadi El Natrun.",
+  "about_description_ar": "دير القديس بيشوي هو أحد أقدم الأديرة القبطية الأرثوذكسية في مصر، ويقع في وادي النطرون.",
+  "about_image": "about.png",
+
+  "monastery_wall_description": "The ancient walls surrounding the monastery were built to protect the monks from Berber raids.",
+  "monastery_wall_description_ar": "بُنيت الأسوار القديمة المحيطة بالدير لحماية الرهبان من غارات البربر.",
+  "monastery_wall_image": "wall.jpg",
+
+  "catacomb_description": "The catacombs of St. Bishoy hold the relics of saints and early martyrs of the Coptic Church.",
+  "catacomb_description_ar": "تحتضن أقبية دير القديس بيشوي رفات القديسين وشهداء الكنيسة القبطية الأوائل.",
+  "catacomb_image": "wall.jpg",
+
+  "monastery_development_description": "The monastery has undergone significant restoration and expansion over recent decades.",
+  "monastery_development_description_ar": "شهد الدير ترميمًا وتوسعًا ملحوظًا على مدى العقود الأخيرة.",
+  "monastery_development_images": [
+    {
+      "image": "wall.jpg",
+      "caption": "East wing restoration",
+      "caption_ar": "ترميم الجناح الشرقي"
+    },
+    {
+      "image": "wall.jpg",
+      "caption": "New guesthouse construction",
+      "caption_ar": "بناء دار الضيافة الجديدة"
+    }
+  ],
+
+  "papal_description": "The monastery has received many historic visits from His Holiness Pope Shenouda III and Pope Tawadros II.",
+  "papal_description_ar": "استقبل الدير زيارات تاريخية عديدة من قداسة البابا شنودة الثالث والبابا تواضروس الثاني.",
+  "papal_image": "wall.jpg",
+
+  "myron_description": "The Holy Myron (Chrism) is prepared at St. Bishoy Monastery under the supervision of His Holiness the Pope.",
+  "myron_description_ar": "يُحضَّر الميرون المقدس في دير القديس بيشوي تحت إشراف قداسة البابا.",
+
+  "monastery_history": [
+    {
+      "date": "320 AD",
+      "date_ar": "٣٢٠ م",
+      "text": "St. Bishoy founded the monastery after a divine vision in Wadi El Natrun.",
+      "text_ar": "أسس القديس بيشوي الدير بعد رؤية إلهية في وادي النطرون."
+    },
+    {
+      "date": "444 AD",
+      "date_ar": "٤٤٤ م",
+      "text": "The monastery was raided and many monks were martyred.",
+      "text_ar": "تعرّض الدير للغزو واستُشهد كثير من الرهبان."
+    }
+  ],
+
+  "myron_timeline": [
+    { "date": "أبريل ١٩٨١م", "text": "بيد قداسة البابا شنودة الثالث." },
+    { "date": "أبريل ١٩٨٧م", "text": "بيد قداسة البابا شنودة الثالث." }
+  ]
+}

@@ -52,10 +52,30 @@ export default function Header({ collapsed, onCollapse }) {
   ];
 
   return (
+    <>
+      <style>{`
+        .topbar-control .ant-select-selector {
+          color: #6B1A1A !important;
+        }
+        .topbar-control .ant-select-selection-item {
+          color: #6B1A1A !important;
+          font-weight: 600;
+        }
+        .topbar-control .ant-select-arrow {
+          color: rgba(107,26,26,0.85) !important;
+        }
+        .topbar-control .ant-select-clear {
+          color: rgba(107,26,26,0.75) !important;
+        }
+        .topbar-control .ant-select-focused .ant-select-selector {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+      `}</style>
     <AntHeader
       style={{
-        background: "#ffffff",
-        borderBottom: "1px solid #e2e8f0",
+        background: "#F9F5EE",
+        borderBottom: "1px solid rgba(107,26,26,0.10)",
         padding: "0 24px",
         display: "flex",
         alignItems: "center",
@@ -82,31 +102,46 @@ export default function Header({ collapsed, onCollapse }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#5C1A1B",
+            color: "#6B1A1A",
+            borderRadius: 10,
+            background: "rgba(107,26,26,0.06)",
           }}
         />
 
         <div className="hidden md:block">
-          <Text strong style={{ fontSize: "18px", color: "#5C1A1B" }}>
+          <Text strong style={{ fontSize: "18px", color: "#6B1A1A" }}>
             {t("header.title")}
           </Text>
         </div>
       </div>
 
       {/* Right side - Language Selector + Profile */}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         {/* Language Selector */}
-        <Select
-          value={language}
-          onChange={changeLanguage}
-          style={{ width: 80 }}
-          variant={"borderless"}
-          popupMatchSelectWidth={false}
-          suffixIcon={<GlobalOutlined style={{ color: "#5C1A1B" }} />}
+        <div
+          className="topbar-control"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "6px 10px",
+            borderRadius: 999,
+            background: "rgba(107,26,26,0.05)",
+            border: "1px solid rgba(107,26,26,0.12)",
+          }}
         >
-          <Option value="en">EN</Option>
-          <Option value="ar">AR</Option>
-        </Select>
+          <GlobalOutlined style={{ color: "rgba(107,26,26,0.9)" }} />
+          <Select
+            value={language}
+            onChange={changeLanguage}
+            style={{ width: 64 }}
+            variant={"borderless"}
+            popupMatchSelectWidth={false}
+          >
+            <Option value="en">EN</Option>
+            <Option value="ar">AR</Option>
+          </Select>
+        </div>
 
         {/* Profile Dropdown */}
         <Dropdown
@@ -120,7 +155,7 @@ export default function Header({ collapsed, onCollapse }) {
               alignItems: "center",
               gap: "8px",
               padding: "4px",
-              background: "transparent",
+              background: "rgba(107,26,26,0.05)",
               border: "none",
               borderRadius: "50%",
               cursor: "pointer",
@@ -130,11 +165,16 @@ export default function Header({ collapsed, onCollapse }) {
             <Avatar
               size="default"
               icon={<UserOutlined />}
-              style={{ background: "#5C1A1B" }}
+              style={{
+                background: "#6B1A1A",
+                color: "#ffffff",
+                border: "1px solid rgba(107,26,26,0.22)",
+              }}
             />
           </button>
         </Dropdown>
       </div>
     </AntHeader>
+    </>
   );
 }

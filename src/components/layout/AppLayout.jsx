@@ -21,7 +21,7 @@ export default function AppLayout({ collapsed, setCollapsed, children }) {
         >
           <div
             style={{
-              background: '#ffffff',
+              background: '#F9F5EE',
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
               minHeight: 'calc(100vh - 120px)',

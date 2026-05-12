@@ -113,7 +113,7 @@ const TagForm = () => {
             {t('common.back')}
           </Button>
           <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TagOutlined style={{ color: '#5C1A1B' }} />
+            <TagOutlined style={{ color: '#6B1A1A' }} />
             {isEditing ? t('tags.edit') : t('tags.create')}
           </Title>
         </div>

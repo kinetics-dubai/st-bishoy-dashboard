@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
 
   const login = (userData, token) => {
     dispatch(loginAction({ user: userData, token }));
-    navigate('/dashboard', { replace: true });
+    navigate('/home', { replace: true });
   };
 
   const logout = () => {

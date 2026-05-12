@@ -11,13 +11,6 @@ import ProtectedRoute from '@/pages/auth/ProtectedRoute';
 import LoginPage from '@/pages/auth/LoginPage';
 import AppLayout from '@/components/layout/AppLayout';
 import StaticSidebar from '@/components/layout/StaticSidebar';
-import AnalyticsPage from '@/pages/analytics/AnalyticsPage';
-import UsersList from '@/pages/users/UsersList';
-import UserDetail from '@/pages/users/UserDetail';
-import UserForm from '@/pages/users/UserForm';
-import TagsList from '@/pages/tags/TagsList';
-import TagForm from '@/pages/tags/TagForm';
-import TagDetail from '@/pages/tags/TagDetail';
 import ArticlesList from '@/pages/articles/ArticlesList';
 import EntitiesList from '@/pages/entities/EntitiesList';
 import EntityDetail from '@/pages/entities/EntityDetail';
@@ -28,9 +21,17 @@ import MonkForm from '@/pages/monks/MonkForm';
 import SaintsList from '@/pages/saints/SaintsList';
 import SaintDetail from '@/pages/saints/SaintDetail';
 import SaintForm from '@/pages/saints/SaintForm';
-import SettingsPage from '@/pages/settings/SettingsPage';
 import HomePage from '@/pages/home/HomePage';
 import MonasteryPage from '@/pages/monastery/MonasteryPage';
+import ProjectsList from '@/pages/projects/ProjectsList';
+import ProjectDetail from '@/pages/projects/ProjectDetail';
+import ProjectForm from '@/pages/projects/ProjectForm';
+import ProductsList from '@/pages/products/ProductsList';
+import ProductDetail from '@/pages/products/ProductDetail';
+import ProductForm from '@/pages/products/ProductForm';
+import SermonsList from '@/pages/sermons/SermonsList';
+import SermonDetail from '@/pages/sermons/SermonDetail';
+import SermonForm from '@/pages/sermons/SermonForm';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import '@/styles/index.css';
 
@@ -80,218 +81,44 @@ export default function App() {
                         </ProtectedRoute>
                       }
                     >
-                      <Route index element={<Navigate to="/dashboard" replace />} />
-                      <Route
-                        path="dashboard"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <AnalyticsPage />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route index element={<Navigate to="/home" replace />} />
 
-                      <Route
-                        path="articles"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <ArticlesList />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="home" element={<ProtectedRoute requiredRole="Admin"><HomePage /></ProtectedRoute>} />
+                      <Route path="monastery" element={<ProtectedRoute requiredRole="Admin"><MonasteryPage /></ProtectedRoute>} />
 
-                      <Route
-                        path="entities"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <EntitiesList />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="entities/create"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <EntityForm />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="entities/:id"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <EntityDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="entities/:id/edit"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <EntityForm />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="monks" element={<ProtectedRoute requiredRole="Admin"><MonksList /></ProtectedRoute>} />
+                      <Route path="monks/create" element={<ProtectedRoute requiredRole="Admin"><MonkForm /></ProtectedRoute>} />
+                      <Route path="monks/:id" element={<ProtectedRoute requiredRole="Admin"><MonkDetail /></ProtectedRoute>} />
+                      <Route path="monks/:id/edit" element={<ProtectedRoute requiredRole="Admin"><MonkForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="home"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <HomePage />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="saints" element={<ProtectedRoute requiredRole="Admin"><SaintsList /></ProtectedRoute>} />
+                      <Route path="saints/create" element={<ProtectedRoute requiredRole="Admin"><SaintForm /></ProtectedRoute>} />
+                      <Route path="saints/:id" element={<ProtectedRoute requiredRole="Admin"><SaintDetail /></ProtectedRoute>} />
+                      <Route path="saints/:id/edit" element={<ProtectedRoute requiredRole="Admin"><SaintForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="monastery"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <MonasteryPage />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="articles" element={<ProtectedRoute requiredRole="Admin"><ArticlesList /></ProtectedRoute>} />
 
-                      <Route
-                        path="settings"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <SettingsPage />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="entities" element={<ProtectedRoute requiredRole="Admin"><EntitiesList /></ProtectedRoute>} />
+                      <Route path="entities/create" element={<ProtectedRoute requiredRole="Admin"><EntityForm /></ProtectedRoute>} />
+                      <Route path="entities/:id" element={<ProtectedRoute requiredRole="Admin"><EntityDetail /></ProtectedRoute>} />
+                      <Route path="entities/:id/edit" element={<ProtectedRoute requiredRole="Admin"><EntityForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="users"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <UsersList />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="users/create"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <UserForm />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="users/:id"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <UserDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="users/:id/edit"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <UserForm />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="projects" element={<ProtectedRoute requiredRole="Admin"><ProjectsList /></ProtectedRoute>} />
+                      <Route path="projects/create" element={<ProtectedRoute requiredRole="Admin"><ProjectForm /></ProtectedRoute>} />
+                      <Route path="projects/:id" element={<ProtectedRoute requiredRole="Admin"><ProjectDetail /></ProtectedRoute>} />
+                      <Route path="projects/:id/edit" element={<ProtectedRoute requiredRole="Admin"><ProjectForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="tags"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <TagsList />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="tags/create"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <TagForm />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="tags/:id"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <TagDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="tags/:id/edit"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <TagForm />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="products" element={<ProtectedRoute requiredRole="Admin"><ProductsList /></ProtectedRoute>} />
+                      <Route path="products/create" element={<ProtectedRoute requiredRole="Admin"><ProductForm /></ProtectedRoute>} />
+                      <Route path="products/:slug" element={<ProtectedRoute requiredRole="Admin"><ProductDetail /></ProtectedRoute>} />
+                      <Route path="products/:slug/edit" element={<ProtectedRoute requiredRole="Admin"><ProductForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="monks"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <MonksList />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="monks/create"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <MonkForm />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="monks/:id"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <MonkDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="monks/:id/edit"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <MonkForm />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <Route path="sermons" element={<ProtectedRoute requiredRole="Admin"><SermonsList /></ProtectedRoute>} />
+                      <Route path="sermons/create" element={<ProtectedRoute requiredRole="Admin"><SermonForm /></ProtectedRoute>} />
+                      <Route path="sermons/:id" element={<ProtectedRoute requiredRole="Admin"><SermonDetail /></ProtectedRoute>} />
+                      <Route path="sermons/:id/edit" element={<ProtectedRoute requiredRole="Admin"><SermonForm /></ProtectedRoute>} />
 
-                      <Route
-                        path="saints"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <SaintsList />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="saints/create"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <SaintForm />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="saints/:id"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <SaintDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="saints/:id/edit"
-                        element={
-                          <ProtectedRoute requiredRole="Admin">
-                            <SaintForm />
-                          </ProtectedRoute>
-                        }
-                      />
-
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="*" element={<Navigate to="/home" replace />} />
                     </Route>
                   </Routes>
                 </AntApp>

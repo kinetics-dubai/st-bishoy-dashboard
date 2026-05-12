@@ -14,7 +14,7 @@ import CenteredLoader from '@/components/CenteredLoader';
 
 // Coptic Church Color Palette
 const COLORS = {
-  primary: '#5C1A1B',      // Deep Coptic Red
+  primary: '#6B1A1A',      // Deep Coptic Red
   success: '#52c41a',      // Green
   warning: '#fa8c16',      // Orange
   error: '#ff4d4f',        // Red

@@ -8,12 +8,12 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   
   /* New Church Dashboard Color Scheme - Deep Church Red & Gold */
-  --primary: #5C1A1B;           /* Deep Church Red */
+  --primary: #6B1A1A;           /* Deep Church Red */
   --primary-hover: #7A2425;
   --secondary: #B7884F;         /* Gold/Bronze */
   --secondary-hover: #C99A61;
   --background: #f6f1e7;        /* Cream */
-  --card-bg: #ffffff;           /* Clean white */
+  --card-bg: #F9F5EE;           /* Warm parchment */
   --text-primary: #1a1a1a;
   --text-secondary: #64748b;
   --text-light: #ffffff;
@@ -48,7 +48,7 @@
   --font-weight-normal: 400;
   
   /* Chart colors */
-  --chart-1: #5C1A1B;
+  --chart-1: #6B1A1A;
   --chart-2: #B7884F;
   --chart-3: #7A2425;
   --chart-4: #C99A61;
@@ -57,7 +57,7 @@
   /* Sidebar */
   --sidebar: #f6f1e7;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #5C1A1B;
+  --sidebar-primary: #6B1A1A;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #B7884F;
   --sidebar-accent-foreground: #ffffff;
@@ -175,44 +175,7 @@
   }
 }
 
-/* Ant Design Menu Overrides for Sidebar - High Specificity */
-body .ant-menu-dark {
-  background: #f6f1e7 !important;
-}
-
-body .ant-menu-dark .ant-menu-item {
-  color: #5C1A1B !important;
-}
-
-body .ant-menu-dark .ant-menu-item .anticon {
-  color: #5C1A1B !important;
-}
-
-body .ant-menu-dark .ant-menu-item-selected {
-  background-color: #5C1A1B !important;
-  color: #ffffff !important;
-  border-radius: 6px !important;
-  margin: 0 8px !important;
-  width: calc(100% - 16px) !important;
-}
-
-body .ant-menu-dark .ant-menu-item-selected .anticon {
-  color: #ffffff !important;
-}
-
-body .ant-menu-dark .ant-menu-item:hover {
-  background-color: rgba(92, 26, 27, 0.1) !important;
-  color: #5C1A1B !important;
-}
-
-body .ant-menu-dark .ant-menu-item-selected:hover {
-  background-color: #5C1A1B !important;
-  color: #ffffff !important;
-}
-
-body .ant-menu-dark .ant-menu-item-selected:hover .anticon {
-  color: #ffffff !important;
-}
+/* Sidebar now uses a parchment style, so avoid global "dark menu" overrides here. */
 
 /* RTL Specific Styles */
 [dir="rtl"] .ant-table-cell {
@@ -280,8 +243,8 @@ body .ant-menu-dark .ant-menu-item-selected:hover .anticon {
 
 /* Primary Button Override */
 .ant-btn-primary {
-  background-color: #5C1A1B !important;
-  border-color: #5C1A1B !important;
+  background-color: #6B1A1A !important;
+  border-color: #6B1A1A !important;
 }
 
 .ant-btn-primary:hover {

@@ -20,8 +20,8 @@ export function RTLProvider({ children }) {
       locale={locale}
       theme={{
         token: {
-          colorPrimary: '#5C1A1B',
-          colorInfo: '#5C1A1B',
+          colorPrimary: '#6B1A1A',
+          colorInfo: '#6B1A1A',
           colorSuccess: '#10b981',
           colorWarning: '#f59e0b',
           colorError: '#ef4444',
@@ -53,14 +53,14 @@ export function RTLProvider({ children }) {
             borderRadius: 8,
           },
           Menu: {
-            darkItemSelectedBg: '#5C1A1B',
+            darkItemSelectedBg: '#6B1A1A',
             darkItemSelectedColor: '#ffffff',
-            darkItemBg: '#f6f1e7',
-            darkItemColor: '#5C1A1B',
+            darkItemBg: '#F9F5EE',
+            darkItemColor: '#6B1A1A',
             // RTL menu adjustments
             ...(direction === 'rtl' && {
-              itemBg: '#ffffff',
-              itemSelectedBg: '#5C1A1B',
+              itemBg: '#F9F5EE',
+              itemSelectedBg: '#6B1A1A',
               itemSelectedColor: '#ffffff',
             }),
           },

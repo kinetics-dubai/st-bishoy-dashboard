@@ -130,12 +130,12 @@ export default function SaintsList() {
         title={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Church size={24} color="#5C1A1B" />
-              <span style={{ fontSize: '20px', fontWeight: 600, color: '#5C1A1B' }}>
+              <Church size={24} color="#6B1A1A" />
+              <span style={{ fontSize: '20px', fontWeight: 600, color: '#6B1A1A' }}>
                 {t('navigation.saints')}
               </span>
             </div>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/saints/create')} style={{ background: '#5C1A1B' }}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/saints/create')} style={{ background: '#6B1A1A' }}>
               {t('saints.create')}
             </Button>
           </div>

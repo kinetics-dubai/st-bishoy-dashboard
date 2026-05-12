@@ -71,7 +71,7 @@ function ErrorFallback({ onReset, onReload, error, isDevelopment }) {
         title={t('error.somethingWentWrong', 'Something went wrong')}
         subTitle={t('error.pageError', 'An unexpected error occurred while rendering this page.')}
         extra={[
-          <Button key="dashboard" type="primary" onClick={onReset} style={{ background: '#5C1A1B' }}>
+          <Button key="dashboard" type="primary" onClick={onReset} style={{ background: '#6B1A1A' }}>
             {t('error.returnToDashboard', 'Return to Dashboard')}
           </Button>,
           <Button key="reload" onClick={onReload}>

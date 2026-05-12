@@ -5,6 +5,7 @@ import { Card, Table, Button, Space, Typography, Modal, message, Input, Tag, Bad
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, FileTextOutlined, TagOutlined, GlobalOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { fetchArticles, deleteArticle, clearError, setPage, setLimit } from '@/store/articlesSlice';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -74,7 +75,7 @@ const ArticlesList = () => {
           await dispatch(deleteArticle(article.id)).unwrap();
           message.success(t('articles.deleteSuccess'));
         } catch (error) {
-          message.error(t('articles.deleteError'));
+          message.error(getApiErrorMessage(error, t('articles.deleteError')));
         }
       },
     });
@@ -103,7 +104,7 @@ const ArticlesList = () => {
             width: '40px', 
             height: '40px', 
             borderRadius: '8px', 
-            background: 'linear-gradient(135deg, #5C1A1B 0%, #8B2A3A 100%)',
+            background: 'linear-gradient(135deg, #6B1A1A 0%, #8B2A3A 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -192,7 +193,7 @@ const ArticlesList = () => {
         <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileTextOutlined style={{ color: '#5C1A1B' }} />
+              <FileTextOutlined style={{ color: '#6B1A1A' }} />
               {t('articles.title')}
             </Title>
     
@@ -214,7 +215,7 @@ const ArticlesList = () => {
             style={{ width: 300 }}
             onChange={(e) => setSearchText(e.target.value)}
             value={searchText}
-            prefix={<FileTextOutlined style={{ color: '#5C1A1B' }} />}
+            prefix={<FileTextOutlined style={{ color: '#6B1A1A' }} />}
           />
         </div>
 
@@ -243,7 +244,7 @@ const ArticlesList = () => {
           background-color: #fafafa;
         }
         .table-row-dark {
-          background-color: #ffffff;
+          background-color: #F9F5EE;
         }
         .ant-table-tbody > tr:hover > td {
           background-color: #f5f5f5 !important;

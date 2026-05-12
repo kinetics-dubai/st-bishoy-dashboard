@@ -220,7 +220,7 @@ export default function SaintDetail() {
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => navigate(`/saints/${id}/edit`)}
-                style={{ background: "#5C1A1B" }}
+                style={{ background: "#6B1A1A" }}
               >
                 {t("common.edit")}
               </Button>

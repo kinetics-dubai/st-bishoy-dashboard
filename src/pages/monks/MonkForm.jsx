@@ -2,24 +2,13 @@ import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Select,
-  Switch,
-  Space,
-  message,
-  Typography,
-  Row,
-  Col,
-} from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Select, Switch, message, Row, Col } from 'antd';
+import { UserOutlined, FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { fetchMonk, createMonk, updateMonk, clearCurrentMonk } from '@/store/monksSlice';
 import { getRankOptions } from '@/lib/ranks';
+import FormPageLayout from '@/components/FormPageLayout';
+import FormSection from '@/components/FormSection';
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
 function normalizeText(value) {
@@ -44,10 +33,7 @@ export default function MonkForm() {
     } else {
       dispatch(clearCurrentMonk());
     }
-
-    return () => {
-      dispatch(clearCurrentMonk());
-    };
+    return () => { dispatch(clearCurrentMonk()); };
   }, [id, isEditMode, dispatch]);
 
   useEffect(() => {
@@ -81,148 +67,120 @@ export default function MonkForm() {
       if (isEditMode) {
         await dispatch(updateMonk({ id, data })).unwrap();
         message.success(t('monk.monkUpdated'));
+        navigate('/monks');
       } else {
         const response = await dispatch(createMonk(data)).unwrap();
         message.success(t('monk.monkCreated'));
         navigate(`/monks/${response.id}`);
-        return;
       }
-
-      navigate('/monks');
     } catch (error) {
       const errorMessage = error?.message || error?.detail || t('common.error');
-      if (error?.errors) {
-        const validationErrors = Object.entries(error.errors)
-          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-          .join('\n');
-        message.error(t('validation.failed', { errors: validationErrors }));
-      } else {
-        message.error(errorMessage);
-      }
+      message.error(errorMessage);
     }
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Space>
-            <Title level={3} style={{ margin: 0, color: '#5C1A1B' }}>
-              {isEditMode ? t('common.edit') : t('navigation.createMonk')}
-            </Title>
-          </Space>
-        </div>
+    <FormPageLayout
+      title={isEditMode ? t('monk.editTitle') : t('monk.createTitle')}
+      subtitle={isEditMode ? t('monk.editTitle') : t('monk.createTitle')}
+      backPath="/monks"
+      form={form}
+      saving={creating || updating}
+      isEditMode={isEditMode}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        initialValues={{ departed: false }}
+      >
+        <FormSection icon={<UserOutlined />} title={t('monk.pageTitle')}>
+          <Row gutter={[24, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.name')}
+                name="name"
+                rules={[
+                  { required: true, message: t('validation.required', { field: t('monk.name') }) },
+                  { min: 2, message: t('validation.minLength', { field: t('monk.name'), min: 2 }) },
+                  { max: 100, message: t('validation.maxLength', { field: t('monk.name'), max: 100 }) },
+                ]}
+              >
+                <Input size="large" placeholder={t('monk.namePlaceholder')} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.name_ar')}
+                name="name_ar"
+                rules={[
+                  { required: true, message: t('validation.required', { field: t('monk.name_ar') }) },
+                  { min: 2, message: t('validation.minLength', { field: t('monk.name_ar'), min: 2 }) },
+                  { max: 100, message: t('validation.maxLength', { field: t('monk.name_ar'), max: 100 }) },
+                ]}
+              >
+                <Input size="large" dir="rtl" placeholder={t('monk.nameArPlaceholder')} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.position')}
+                name="position"
+                rules={[{ required: true, message: t('validation.required', { field: t('monk.position') }) }]}
+              >
+                <Input size="large" placeholder={t('monk.positionPlaceholder')} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.position_ar')}
+                name="position_ar"
+                rules={[{ required: true, message: t('validation.required', { field: t('monk.position_ar') }) }]}
+              >
+                <Input size="large" dir="rtl" placeholder={t('monk.positionArPlaceholder')} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.rank')}
+                name="rank"
+                rules={isEditMode ? [] : [{ required: true, message: t('validation.required', { field: t('monk.rank') }) }]}
+              >
+                <Select size="large" placeholder={t('monk.selectRank')} options={rankOptions} allowClear={isEditMode} />
+              </Form.Item>
+            </Col>
+          </Row>
+        </FormSection>
 
-        <Card loading={loading && isEditMode}>
-          <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ departed: false }}>
-            <Row gutter={[24, 0]}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.name')}
-                  name="name"
-                  rules={[
-                    { required: true, message: t('validation.required', { field: t('monk.name') }) },
-                    { min: 2, message: t('validation.minLength', { field: t('monk.name'), min: 2 }) },
-                    { max: 100, message: t('validation.maxLength', { field: t('monk.name'), max: 100 }) },
-                  ]}
-                >
-                  <Input size="large" placeholder={t('monk.namePlaceholder')} />
-                </Form.Item>
-              </Col>
+        <FormSection icon={<FileTextOutlined />} title={t('monk.biography')}>
+          <Row gutter={[24, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.bio')}
+                name="bio"
+                rules={[{ max: 2000, message: t('validation.maxLength', { field: t('monk.bio'), max: 2000 }) }]}
+              >
+                <TextArea rows={6} placeholder={t('monk.bioPlaceholder')} showCount maxLength={2000} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={t('monk.bio_ar')}
+                name="bio_ar"
+                rules={[{ max: 2000, message: t('validation.maxLength', { field: t('monk.bio_ar'), max: 2000 }) }]}
+              >
+                <TextArea rows={6} dir="rtl" placeholder={t('monk.bioArabicPlaceholder')} showCount maxLength={2000} />
+              </Form.Item>
+            </Col>
+          </Row>
+        </FormSection>
 
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.name_ar')}
-                  name="name_ar"
-                  rules={[
-                    { required: true, message: t('validation.required', { field: t('monk.name_ar') }) },
-                    { min: 2, message: t('validation.minLength', { field: t('monk.name_ar'), min: 2 }) },
-                    { max: 100, message: t('validation.maxLength', { field: t('monk.name_ar'), max: 100 }) },
-                  ]}
-                >
-                  <Input size="large" dir="rtl" placeholder={t('monk.nameArPlaceholder')} />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.position')}
-                  name="position"
-                  rules={[{ required: true, message: t('validation.required', { field: t('monk.position') }) }]}
-                >
-                  <Input size="large" placeholder={t('monk.positionPlaceholder')} />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.rank')}
-                  name="rank"
-                  rules={
-                    isEditMode
-                      ? []
-                      : [{ required: true, message: t('validation.required', { field: t('monk.rank') }) }]
-                  }
-                >
-                  <Select
-                    size="large"
-                    placeholder={t('monk.selectRank')}
-                    options={rankOptions}
-                    allowClear={isEditMode}
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.position_ar')}
-                  name="position_ar"
-                  rules={[{ required: true, message: t('validation.required', { field: t('monk.position_ar') }) }]}
-                >
-                  <Input size="large" dir="rtl" placeholder={t('monk.positionArPlaceholder')} />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Row gutter={[24, 0]}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.bio')}
-                  name="bio"
-                  rules={[{ max: 2000, message: t('validation.maxLength', { field: t('monk.bio'), max: 2000 }) }]}
-                >
-                  <TextArea rows={6} placeholder={t('monk.bioPlaceholder')} showCount maxLength={2000} />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={t('monk.bio_ar')}
-                  name="bio_ar"
-                  rules={[{ max: 2000, message: t('validation.maxLength', { field: t('monk.bio_ar'), max: 2000 }) }]}
-                >
-                  <TextArea rows={6} dir="rtl" placeholder={t('monk.bioArabicPlaceholder')} showCount maxLength={2000} />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Form.Item label={t('monk.departed')} name="departed" valuePropName="checked">
-              <Switch checkedChildren={t('monk.departedYes')} unCheckedChildren={t('monk.departedNo')} />
-            </Form.Item>
-
-            <Form.Item>
-              <Space>
-                <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={creating || updating} style={{ background: '#5C1A1B' }}>
-                  {isEditMode ? t('common.save') : t('common.create')}
-                </Button>
-                <Button onClick={() => navigate('/monks')}>
-                  {t('common.cancel')}
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Card>
-      </Space>
-    </div>
+        <FormSection icon={<CheckCircleOutlined />} title={t('monk.importantDates')}>
+          <Form.Item label={t('monk.departed')} name="departed" valuePropName="checked">
+            <Switch checkedChildren={t('monk.departedYes')} unCheckedChildren={t('monk.departedNo')} />
+          </Form.Item>
+        </FormSection>
+      </Form>
+    </FormPageLayout>
   );
 }

@@ -1,4 +1,7 @@
+const NEXT_PUBLIC_API_BASE_URL_IMAGE =
+  import.meta.env.NEXT_PUBLIC_API_BASE_URL_IMAGE || '';
 const MEDIA_BASE_URL = import.meta.env.VITE_API_MEDIA_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export function resolveMediaUrl(path) {
   if (!path) return '';
@@ -15,13 +18,14 @@ export function resolveMediaUrl(path) {
     return value;
   }
 
-  if (!MEDIA_BASE_URL) {
+  const baseUrl =
+    NEXT_PUBLIC_API_BASE_URL_IMAGE || MEDIA_BASE_URL || API_BASE_URL;
+
+  if (!baseUrl) {
     return value;
   }
 
-  const normalizedBase = MEDIA_BASE_URL.endsWith('/')
-    ? MEDIA_BASE_URL.slice(0, -1)
-    : MEDIA_BASE_URL;
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   const normalizedPath = value.startsWith('/') ? value : `/${value}`;
 
   return `${normalizedBase}${normalizedPath}`;
