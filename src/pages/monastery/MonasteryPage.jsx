@@ -9,7 +9,6 @@ import {
   Input,
   Menu,
   Row,
-  Space,
   Spin,
   Typography,
   message,
@@ -64,6 +63,7 @@ const DEFAULT_MONASTERY = {
   papal_image: "",
   myron_description: "",
   myron_description_ar: "",
+  myron_image: "",
   monastery_history: [],
   myron_timeline: [],
   monastery_development_images: [],
@@ -194,6 +194,7 @@ function normalizeMonastery(payload) {
     myron_description_ar: normalizeText(
       rawMonastery.myron_description_ar ?? myron.description_ar,
     ),
+    myron_image: normalizeOptionalValue(rawMonastery.myron_image ?? myron.image),
     monastery_history: normalizeList(
       coerceToArray(historySource),
       HISTORY_ITEM_SHAPE,
@@ -236,6 +237,7 @@ function buildMonasterySnapshot(values) {
     papal_image: normalizeOptionalValue(values.papal_image),
     myron_description: normalizeText(values.myron_description),
     myron_description_ar: normalizeText(values.myron_description_ar),
+    myron_image: normalizeOptionalValue(values.myron_image),
     monastery_history: normalizeList(values.monastery_history, HISTORY_ITEM_SHAPE),
     myron_timeline: normalizeList(values.myron_timeline, MYRON_TIMELINE_ITEM_SHAPE),
     monastery_development_images: normalizeList(
@@ -509,7 +511,7 @@ export default function MonasteryPage() {
     ],
     history: ["monastery_history"],
     papal: ["papal_description", "papal_description_ar", "papal_image"],
-    myron: ["myron_description", "myron_description_ar", "myron_timeline"],
+    myron: ["myron_description", "myron_description_ar", "myron_image", "myron_timeline"],
   };
 
   const handleSelectSection = (key) => {
@@ -865,6 +867,14 @@ export default function MonasteryPage() {
                     textarea
                     rows={5}
                   />
+                  <Form.Item name="myron_image" label={t("monastery.myronImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("monastery.uploadMyronImage")}
+                      emptyLabel={t("monastery.noImage")}
+                      removeLabel={t("monastery.removeImage")}
+                      errorLabel={t("monastery.imageProcessError")}
+                    />
+                  </Form.Item>
                   <Divider />
                   <MyronTimelineList t={t} />
                 </Card>

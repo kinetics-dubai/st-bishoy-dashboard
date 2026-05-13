@@ -57,7 +57,7 @@ export default function EntityDetail() {
 
   useEffect(() => {
     if (!currentEntity?.parentId || currentEntity.parent || entities.length > 0) return;
-    dispatch(fetchEntities({ page: 1, limit: 1000 }));
+    dispatch(fetchEntities({ page: 1, limit: 100 }));
   }, [currentEntity, dispatch, entities.length]);
 
   const displayName =

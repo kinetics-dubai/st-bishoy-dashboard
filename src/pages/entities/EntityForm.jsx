@@ -104,7 +104,7 @@ export default function EntityForm() {
   const watchedHasDetails = Form.useWatch("hasDetails", form);
 
   useEffect(() => {
-    dispatch(fetchEntities({ page: 1, limit: 1000 }));
+    dispatch(fetchEntities({ page: 1, limit: 100 }));
 
     if (isEditing && id) {
       dispatch(fetchEntity(id));
