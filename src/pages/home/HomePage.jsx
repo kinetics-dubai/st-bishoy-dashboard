@@ -182,6 +182,44 @@ export default function HomePage() {
     ? activeSectionParam
     : "hero";
 
+  const SECTION_FIELDS = {
+    hero: [
+      "hero_image",
+      "hero_cta_text",
+      "hero_cta_text_ar",
+      "hero_cta_url",
+      "hero_title",
+      "hero_title_ar",
+      "hero_text",
+      "hero_text_ar",
+      "hero_monastery_description",
+      "hero_monastery_description_ar",
+      "hero_monastery_location",
+      "hero_monastery_location_ar",
+      "hero_monastery_hours",
+      "hero_monastery_hours_ar",
+    ],
+    spiritual_verse: [
+      "spiritual_verse_verse",
+      "spiritual_verse_verse_ar",
+      "spiritual_verse_chapter",
+      "spiritual_verse_chapter_ar",
+    ],
+    about: ["about_text", "about_text_ar", "about_image"],
+    st_bishoy_bio: [
+      "st_bishoy_bio_description",
+      "st_bishoy_bio_description_ar",
+      "st_bishoy_image",
+    ],
+    monastery: [
+      "monastery_description",
+      "monastery_description_ar",
+      "monastery_image",
+    ],
+    area: ["area_description", "area_description_ar"],
+    papa: ["papa_description", "papa_description_ar"],
+  };
+
   const handleSelectSection = (key) => {
     setSearchParams((prevParams) => {
       const next = new URLSearchParams(prevParams);
@@ -213,15 +251,48 @@ export default function HomePage() {
     fetchHome();
   }, [form, t]);
 
+  const applyBackendValidationErrors = (details) => {
+    if (!Array.isArray(details) || !details.length) return false;
+
+    const toNamePath = (field) =>
+      String(field)
+        .split(".")
+        .filter(Boolean)
+        .map((part) => (part.match(/^\d+$/) ? Number(part) : part));
+
+    form.setFields(
+      details
+        .filter((item) => item?.field)
+        .map((item) => ({
+          name: toNamePath(item.field),
+          errors: [String(item?.message || t("common.error"))],
+        })),
+    );
+
+    return true;
+  };
+
   const handleSubmit = async (values) => {
     try {
       setSaving(true);
-      const nextValues = buildHomePayload(values);
-      const payload = Object.fromEntries(
-        Object.entries(nextValues).filter(
-          ([key, value]) => value !== initialHome[key],
-        ),
+      form.setFields(
+        form
+          .getFieldsError()
+          .filter((f) => f.errors?.length)
+          .map((f) => ({ name: f.name, errors: [] })),
       );
+
+      const nextValues = buildHomePayload(values);
+      const payload = {};
+      const sectionFields = SECTION_FIELDS[activeSection] ?? [];
+
+      for (const [key, value] of Object.entries(nextValues)) {
+        if (!sectionFields.includes(key)) continue;
+
+        if (value !== initialHome[key]) {
+          payload[key] = value;
+        }
+      }
 
       if (!Object.keys(payload).length) {
         message.info(t("common.noChanges"));
@@ -230,14 +301,21 @@ export default function HomePage() {
       }
 
       const response = await apiService.put("/home", payload);
-      const normalizedHome = normalizeHome(
-        response?.data?.data ? response.data : (response.data ?? nextValues),
-      );
+      const nextBaselineSource = response?.data?.data
+        ? response.data
+        : { ...initialHome, ...nextValues, ...payload, id: homeId };
+      const normalizedHome = normalizeHome(nextBaselineSource);
       setHomeId(normalizedHome.id || homeId);
       setInitialHome(normalizedHome);
       form.setFieldsValue(normalizedHome);
       message.success(t("home.saveSuccess"));
     } catch (error) {
+      const details = error?.details || error?.response?.data?.details;
+      if (applyBackendValidationErrors(details)) {
+        message.error(error?.error || error?.response?.data?.error || t("home.saveError"));
+        return;
+      }
+
       message.error(
         error?.response?.data?.message || error?.message || t("home.saveError"),
       );

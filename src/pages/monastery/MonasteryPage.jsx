@@ -136,9 +136,7 @@ function normalizeMonastery(payload) {
     rawMonastery.monastery_history ??
     (Array.isArray(rawMonastery.history) ? rawMonastery.history : null) ??
     history.content;
-  const myronTimelineSource =
-    rawMonastery.myron_timeline ??
-    myron.timeline;
+  const myronTimelineSource = rawMonastery.myron_timeline ?? myron.timeline;
 
   return {
     ...DEFAULT_MONASTERY,
@@ -159,7 +157,8 @@ function normalizeMonastery(payload) {
       rawMonastery.monastery_wall_description ?? monasteryWall.description,
     ),
     monastery_wall_description_ar: normalizeText(
-      rawMonastery.monastery_wall_description_ar ?? monasteryWall.description_ar,
+      rawMonastery.monastery_wall_description_ar ??
+        monasteryWall.description_ar,
     ),
     monastery_wall_image: normalizeOptionalValue(
       rawMonastery.monastery_wall_image ?? monasteryWall.image,
@@ -187,14 +186,18 @@ function normalizeMonastery(payload) {
     papal_description_ar: normalizeText(
       rawMonastery.papal_description_ar ?? papal.description_ar,
     ),
-    papal_image: normalizeOptionalValue(rawMonastery.papal_image ?? papal.image),
+    papal_image: normalizeOptionalValue(
+      rawMonastery.papal_image ?? papal.image,
+    ),
     myron_description: normalizeText(
       rawMonastery.myron_description ?? myron.description,
     ),
     myron_description_ar: normalizeText(
       rawMonastery.myron_description_ar ?? myron.description_ar,
     ),
-    myron_image: normalizeOptionalValue(rawMonastery.myron_image ?? myron.image),
+    myron_image: normalizeOptionalValue(
+      rawMonastery.myron_image ?? myron.image,
+    ),
     monastery_history: normalizeList(
       coerceToArray(historySource),
       HISTORY_ITEM_SHAPE,
@@ -218,7 +221,9 @@ function buildMonasterySnapshot(values) {
     about_description: normalizeText(values.about_description),
     about_description_ar: normalizeText(values.about_description_ar),
     about_image: normalizeOptionalValue(values.about_image),
-    monastery_wall_description: normalizeText(values.monastery_wall_description),
+    monastery_wall_description: normalizeText(
+      values.monastery_wall_description,
+    ),
     monastery_wall_description_ar: normalizeText(
       values.monastery_wall_description_ar,
     ),
@@ -238,8 +243,14 @@ function buildMonasterySnapshot(values) {
     myron_description: normalizeText(values.myron_description),
     myron_description_ar: normalizeText(values.myron_description_ar),
     myron_image: normalizeOptionalValue(values.myron_image),
-    monastery_history: normalizeList(values.monastery_history, HISTORY_ITEM_SHAPE),
-    myron_timeline: normalizeList(values.myron_timeline, MYRON_TIMELINE_ITEM_SHAPE),
+    monastery_history: normalizeList(
+      values.monastery_history,
+      HISTORY_ITEM_SHAPE,
+    ),
+    myron_timeline: normalizeList(
+      values.myron_timeline,
+      MYRON_TIMELINE_ITEM_SHAPE,
+    ),
     monastery_development_images: normalizeList(
       values.monastery_development_images,
       DEVELOPMENT_IMAGE_SHAPE,
@@ -265,7 +276,10 @@ function BilingualTextFields({
     <Row gutter={16}>
       <Col xs={24} md={12}>
         <Form.Item name={leftName} label={leftLabel} rules={leftRules}>
-          <Component rows={textarea ? rows : undefined} placeholder={leftPlaceholder} />
+          <Component
+            rows={textarea ? rows : undefined}
+            placeholder={leftPlaceholder}
+          />
         </Form.Item>
       </Col>
       <Col xs={24} md={12}>
@@ -306,12 +320,6 @@ function HistoryList({ t, name, titleKey, addLabelKey }) {
     <Form.List name={name}>
       {(fields, { add, remove }) => (
         <>
-          <RepeaterHeader
-            title={t(titleKey)}
-            addLabel={t(addLabelKey)}
-            onAdd={() => add({ ...HISTORY_ITEM_SHAPE })}
-          />
-
           {!fields.length ? (
             <Text type="secondary">{t("monastery.emptyRows")}</Text>
           ) : null}
@@ -353,6 +361,11 @@ function HistoryList({ t, name, titleKey, addLabelKey }) {
               />
             </Card>
           ))}
+          <RepeaterHeader
+            title={t(titleKey)}
+            addLabel={t(addLabelKey)}
+            onAdd={() => add({ ...HISTORY_ITEM_SHAPE })}
+          />
         </>
       )}
     </Form.List>
@@ -391,11 +404,24 @@ function MyronTimelineList({ t }) {
                 </Button>
               }
             >
-              <Form.Item name={[field.name, "date"]} label={t("monastery.rowDate")}>
-                <Input dir="rtl" placeholder={t("monastery.rowDatePlaceholder")} />
+              <Form.Item
+                name={[field.name, "date"]}
+                label={t("monastery.rowDate")}
+              >
+                <Input
+                  dir="rtl"
+                  placeholder={t("monastery.rowDatePlaceholder")}
+                />
               </Form.Item>
-              <Form.Item name={[field.name, "text"]} label={t("monastery.rowText")}>
-                <TextArea rows={4} dir="rtl" placeholder={t("monastery.rowTextPlaceholder")} />
+              <Form.Item
+                name={[field.name, "text"]}
+                label={t("monastery.rowText")}
+              >
+                <TextArea
+                  rows={4}
+                  dir="rtl"
+                  placeholder={t("monastery.rowTextPlaceholder")}
+                />
               </Form.Item>
             </Card>
           ))}
@@ -454,11 +480,15 @@ function DevelopmentImagesList({ t }) {
                     leftName={[field.name, "caption"]}
                     leftLabel={t("monastery.caption")}
                     leftPlaceholder={t("monastery.captionPlaceholder")}
-                    leftRules={[{ required: true, message: t("validation.required") }]}
+                    leftRules={[
+                      { required: true, message: t("validation.required") },
+                    ]}
                     rightName={[field.name, "caption_ar"]}
                     rightLabel={t("monastery.captionAr")}
                     rightPlaceholder={t("monastery.captionArPlaceholder")}
-                    rightRules={[{ required: true, message: t("validation.required") }]}
+                    rightRules={[
+                      { required: true, message: t("validation.required") },
+                    ]}
                   />
                 </Col>
               </Row>
@@ -503,7 +533,11 @@ export default function MonasteryPage() {
       "monastery_wall_description_ar",
       "monastery_wall_image",
     ],
-    catacomb: ["catacomb_description", "catacomb_description_ar", "catacomb_image"],
+    catacomb: [
+      "catacomb_description",
+      "catacomb_description_ar",
+      "catacomb_image",
+    ],
     development: [
       "monastery_development_description",
       "monastery_development_description_ar",
@@ -511,7 +545,12 @@ export default function MonasteryPage() {
     ],
     history: ["monastery_history"],
     papal: ["papal_description", "papal_description_ar", "papal_image"],
-    myron: ["myron_description", "myron_description_ar", "myron_image", "myron_timeline"],
+    myron: [
+      "myron_description",
+      "myron_description_ar",
+      "myron_image",
+      "myron_timeline",
+    ],
   };
 
   const handleSelectSection = (key) => {
@@ -613,12 +652,18 @@ export default function MonasteryPage() {
     } catch (error) {
       const details = error?.details || error?.response?.data?.details;
       if (applyBackendValidationErrors(details)) {
-        message.error(error?.error || error?.response?.data?.error || t("monastery.saveError"));
+        message.error(
+          error?.error ||
+            error?.response?.data?.error ||
+            t("monastery.saveError"),
+        );
         return;
       }
 
       message.error(
-        error?.response?.data?.message || error?.message || t("monastery.saveError"),
+        error?.response?.data?.message ||
+          error?.message ||
+          t("monastery.saveError"),
       );
     } finally {
       setSaving(false);
@@ -672,8 +717,14 @@ export default function MonasteryPage() {
                       { key: "cover", label: t("monastery.coverSection") },
                       { key: "about", label: t("monastery.aboutSection") },
                       { key: "wall", label: t("monastery.wallSection") },
-                      { key: "catacomb", label: t("monastery.catacombSection") },
-                      { key: "development", label: t("monastery.developmentSection") },
+                      {
+                        key: "catacomb",
+                        label: t("monastery.catacombSection"),
+                      },
+                      {
+                        key: "development",
+                        label: t("monastery.developmentSection"),
+                      },
                       { key: "history", label: t("monastery.historySection") },
                       { key: "papal", label: t("monastery.papalSection") },
                       { key: "myron", label: t("monastery.myronSection") },
@@ -690,7 +741,10 @@ export default function MonasteryPage() {
                   title={t("monastery.coverSection")}
                   style={{ borderRadius: 12 }}
                 >
-                  <Form.Item name="cover_image" label={t("monastery.coverImage")}>
+                  <Form.Item
+                    name="cover_image"
+                    label={t("monastery.coverImage")}
+                  >
                     <Base64ImageUpload
                       buttonLabel={t("monastery.uploadCoverImage")}
                       emptyLabel={t("monastery.noImage")}
@@ -713,11 +767,16 @@ export default function MonasteryPage() {
                     leftPlaceholder={t("monastery.aboutDescriptionPlaceholder")}
                     rightName="about_description_ar"
                     rightLabel={t("monastery.aboutDescriptionAr")}
-                    rightPlaceholder={t("monastery.aboutDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.aboutDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
-                  <Form.Item name="about_image" label={t("monastery.aboutImage")}>
+                  <Form.Item
+                    name="about_image"
+                    label={t("monastery.aboutImage")}
+                  >
                     <Base64ImageUpload
                       buttonLabel={t("monastery.uploadAboutImage")}
                       emptyLabel={t("monastery.noImage")}
@@ -740,7 +799,9 @@ export default function MonasteryPage() {
                     leftPlaceholder={t("monastery.wallDescriptionPlaceholder")}
                     rightName="monastery_wall_description_ar"
                     rightLabel={t("monastery.wallDescriptionAr")}
-                    rightPlaceholder={t("monastery.wallDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.wallDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
@@ -767,10 +828,14 @@ export default function MonasteryPage() {
                   <BilingualTextFields
                     leftName="catacomb_description"
                     leftLabel={t("monastery.catacombDescription")}
-                    leftPlaceholder={t("monastery.catacombDescriptionPlaceholder")}
+                    leftPlaceholder={t(
+                      "monastery.catacombDescriptionPlaceholder",
+                    )}
                     rightName="catacomb_description_ar"
                     rightLabel={t("monastery.catacombDescriptionAr")}
-                    rightPlaceholder={t("monastery.catacombDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.catacombDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
@@ -797,10 +862,14 @@ export default function MonasteryPage() {
                   <BilingualTextFields
                     leftName="monastery_development_description"
                     leftLabel={t("monastery.developmentDescription")}
-                    leftPlaceholder={t("monastery.developmentDescriptionPlaceholder")}
+                    leftPlaceholder={t(
+                      "monastery.developmentDescriptionPlaceholder",
+                    )}
                     rightName="monastery_development_description_ar"
                     rightLabel={t("monastery.developmentDescriptionAr")}
-                    rightPlaceholder={t("monastery.developmentDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.developmentDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
@@ -836,11 +905,16 @@ export default function MonasteryPage() {
                     leftPlaceholder={t("monastery.papalDescriptionPlaceholder")}
                     rightName="papal_description_ar"
                     rightLabel={t("monastery.papalDescriptionAr")}
-                    rightPlaceholder={t("monastery.papalDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.papalDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
-                  <Form.Item name="papal_image" label={t("monastery.papalImage")}>
+                  <Form.Item
+                    name="papal_image"
+                    label={t("monastery.papalImage")}
+                  >
                     <Base64ImageUpload
                       buttonLabel={t("monastery.uploadPapalImage")}
                       emptyLabel={t("monastery.noImage")}
@@ -863,11 +937,16 @@ export default function MonasteryPage() {
                     leftPlaceholder={t("monastery.myronDescriptionPlaceholder")}
                     rightName="myron_description_ar"
                     rightLabel={t("monastery.myronDescriptionAr")}
-                    rightPlaceholder={t("monastery.myronDescriptionArPlaceholder")}
+                    rightPlaceholder={t(
+                      "monastery.myronDescriptionArPlaceholder",
+                    )}
                     textarea
                     rows={5}
                   />
-                  <Form.Item name="myron_image" label={t("monastery.myronImage")}>
+                  <Form.Item
+                    name="myron_image"
+                    label={t("monastery.myronImage")}
+                  >
                     <Base64ImageUpload
                       buttonLabel={t("monastery.uploadMyronImage")}
                       emptyLabel={t("monastery.noImage")}

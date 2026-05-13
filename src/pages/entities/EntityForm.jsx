@@ -16,7 +16,6 @@ import {
 import {
   HomeOutlined,
   FileTextOutlined,
-  PictureOutlined,
   BookOutlined,
   EnvironmentOutlined,
   StarOutlined,
@@ -169,10 +168,10 @@ export default function EntityForm() {
         name_ar: normalizeText(values.name_ar),
         excerpt: normalizeText(values.excerpt),
         excerpt_ar: normalizeText(values.excerpt_ar),
-        cover_image: normalizeOptionalValue(values.cover_image),
-        overview_description: normalizeOptionalText(values.overview_description),
-        overview_description_ar: normalizeOptionalText(values.overview_description_ar),
-        overview_image: normalizeOptionalValue(values.overview_image),
+        cover_image: hasDetails ? normalizeOptionalValue(values.cover_image) : null,
+        overview_description: hasDetails ? normalizeOptionalText(values.overview_description) : null,
+        overview_description_ar: hasDetails ? normalizeOptionalText(values.overview_description_ar) : null,
+        overview_image: hasDetails ? normalizeOptionalValue(values.overview_image) : null,
         entity_history: hasDetails ? normalizeOptionalText(values.entity_history) : null,
         entity_history_ar: hasDetails ? normalizeOptionalText(values.entity_history_ar) : null,
         entity_history_image: hasDetails ? normalizeOptionalValue(values.entity_history_image) : null,
@@ -290,11 +289,6 @@ export default function EntityForm() {
                 />
               </Form.Item>
             </Col>
-          </Row>
-        </FormSection>
-
-        <FormSection icon={<PictureOutlined />} title={t("entities.images")}>
-          <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
               <Form.Item
                 name="thumbnail"
@@ -315,49 +309,6 @@ export default function EntityForm() {
               </Form.Item>
               <ImagePreview src={watchedThumbnail} label={t("entities.thumbnail")} />
             </Col>
-            <Col xs={24} md={12}>
-              <Form.Item name="cover_image" label={t("entities.coverImage")}>
-                <Base64ImageUpload
-                  buttonLabel={t("entities.uploadCoverImage")}
-                  emptyLabel={t("entities.noImage")}
-                  removeLabel={t("entities.removeImage")}
-                  errorLabel={t("entities.imageProcessError")}
-                />
-              </Form.Item>
-              <ImagePreview src={watchedCoverImage} label={t("entities.coverImage")} />
-            </Col>
-          </Row>
-        </FormSection>
-
-        <FormSection icon={<FileTextOutlined />} title={t("entities.overviewSection")}>
-          <Row gutter={[24, 0]}>
-            <Col xs={24} md={12}>
-              <Form.Item
-                name="overview_description"
-                label={t("entities.overviewDescription")}
-              >
-                <TextArea rows={5} placeholder={t("entities.overviewDescriptionPlaceholder")} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                name="overview_description_ar"
-                label={t("entities.overviewDescriptionAr")}
-              >
-                <TextArea rows={5} dir="rtl" placeholder={t("entities.overviewDescriptionArPlaceholder")} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item name="overview_image" label={t("entities.overviewImage")}>
-                <Base64ImageUpload
-                  buttonLabel={t("entities.uploadOverviewImage")}
-                  emptyLabel={t("entities.noImage")}
-                  removeLabel={t("entities.removeImage")}
-                  errorLabel={t("entities.imageProcessError")}
-                />
-              </Form.Item>
-              <ImagePreview src={watchedOverviewImage} label={t("entities.overviewImage")} />
-            </Col>
           </Row>
         </FormSection>
 
@@ -369,6 +320,54 @@ export default function EntityForm() {
 
         {watchedHasDetails && (
           <>
+            <FormSection icon={<BookOutlined />} title={t("entities.images")}>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item name="cover_image" label={t("entities.coverImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("entities.uploadCoverImage")}
+                      emptyLabel={t("entities.noImage")}
+                      removeLabel={t("entities.removeImage")}
+                      errorLabel={t("entities.imageProcessError")}
+                    />
+                  </Form.Item>
+                  <ImagePreview src={watchedCoverImage} label={t("entities.coverImage")} />
+                </Col>
+              </Row>
+            </FormSection>
+
+            <FormSection icon={<FileTextOutlined />} title={t("entities.overviewSection")}>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="overview_description"
+                    label={t("entities.overviewDescription")}
+                  >
+                    <TextArea rows={5} placeholder={t("entities.overviewDescriptionPlaceholder")} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="overview_description_ar"
+                    label={t("entities.overviewDescriptionAr")}
+                  >
+                    <TextArea rows={5} dir="rtl" placeholder={t("entities.overviewDescriptionArPlaceholder")} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item name="overview_image" label={t("entities.overviewImage")}>
+                    <Base64ImageUpload
+                      buttonLabel={t("entities.uploadOverviewImage")}
+                      emptyLabel={t("entities.noImage")}
+                      removeLabel={t("entities.removeImage")}
+                      errorLabel={t("entities.imageProcessError")}
+                    />
+                  </Form.Item>
+                  <ImagePreview src={watchedOverviewImage} label={t("entities.overviewImage")} />
+                </Col>
+              </Row>
+            </FormSection>
+
             <FormSection icon={<StarOutlined />} title={t("entities.historySection")}>
               <Row gutter={[24, 0]}>
                 <Col xs={24} md={12}>
