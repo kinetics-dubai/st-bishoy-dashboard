@@ -1,30 +1,30 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import apiService from '@/services/apiService';
-import { buildQuery } from '@/lib/queryHelper';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import apiService from "@/services/apiService";
+import { buildQuery } from "@/lib/queryHelper";
 
 const normalizeMonk = (monk) => {
   if (!monk) return monk;
 
   return {
     id: monk.id,
-    name: monk.name || '',
-    name_ar: monk.name_ar || '',
-    rank: monk.rank || '',
-    position: monk.position || '',
-    position_ar: monk.position_ar || '',
-    bio: monk.bio || '',
-    bio_ar: monk.bio_ar || '',
+    name: monk.name || "",
+    name_ar: monk.name_ar || "",
+    rank: monk.rank || "",
+    position: monk.position || "",
+    position_ar: monk.position_ar || "",
+    bio: monk.bio || "",
+    bio_ar: monk.bio_ar || "",
     departed: Boolean(monk.departed),
     ...monk,
   };
 };
 
 export const fetchMonks = createAsyncThunk(
-  'monks/fetchMonks',
+  "monks/fetchMonks",
   async (params = {}, { rejectWithValue }) => {
     try {
       const queryString = buildQuery(params);
-      const url = queryString ? `/monks?${queryString}` : '/monks';
+      const url = queryString ? `/monks?${queryString}` : "/monks";
       const response = await apiService.get(url);
       return {
         ...response.data,
@@ -33,11 +33,11 @@ export const fetchMonks = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchMonk = createAsyncThunk(
-  'monks/fetchMonk',
+  "monks/fetchMonk",
   async (id, { rejectWithValue }) => {
     try {
       const response = await apiService.get(`/monks/${id}`);
@@ -45,35 +45,35 @@ export const fetchMonk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const createMonk = createAsyncThunk(
-  'monks/createMonk',
+  "monks/createMonk",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await apiService.post('/monks', data);
+      const response = await apiService.post("/monks", data);
       return normalizeMonk(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const updateMonk = createAsyncThunk(
-  'monks/updateMonk',
+  "monks/updateMonk",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch(`/monks/${id}`, data);
+      const response = await apiService.put(`/monks/${id}`, data);
       return normalizeMonk(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const deleteMonk = createAsyncThunk(
-  'monks/deleteMonk',
+  "monks/deleteMonk",
   async (id, { rejectWithValue }) => {
     try {
       await apiService.delete(`/monks/${id}`);
@@ -81,7 +81,7 @@ export const deleteMonk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 const initialState = {
@@ -100,7 +100,7 @@ const initialState = {
 };
 
 const monksSlice = createSlice({
-  name: 'monks',
+  name: "monks",
   initialState,
   reducers: {
     clearCurrentMonk: (state) => {
@@ -134,7 +134,8 @@ const monksSlice = createSlice({
 
         state.loading = false;
         state.monks = action.payload?.data || [];
-        state.total = action.payload?.totalCount || action.payload?.data?.length || 0;
+        state.total =
+          action.payload?.totalCount || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
       .addCase(fetchMonks.rejected, (state, action) => {
@@ -180,7 +181,9 @@ const monksSlice = createSlice({
       .addCase(updateMonk.fulfilled, (state, action) => {
         state.updating = false;
         if (action.payload) {
-          const index = state.monks.findIndex((m) => m.id === action.payload.id);
+          const index = state.monks.findIndex(
+            (m) => m.id === action.payload.id,
+          );
           if (index !== -1) {
             state.monks[index] = action.payload;
           }
@@ -212,5 +215,6 @@ const monksSlice = createSlice({
   },
 });
 
-export const { clearCurrentMonk, clearError, setPage, setLimit, setTotal } = monksSlice.actions;
+export const { clearCurrentMonk, clearError, setPage, setLimit, setTotal } =
+  monksSlice.actions;
 export default monksSlice.reducer;

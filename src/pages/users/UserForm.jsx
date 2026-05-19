@@ -5,6 +5,7 @@ import { Form, Input, Select, Switch, Button, Card, message, Space, DatePicker, 
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { updateUser, fetchUser, createUser } from '@/store/usersSlice';
+import { getDirtyValues } from '@/lib/formUtils';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -47,13 +48,29 @@ const UserForm = () => {
     try {
       const submitData = {
         ...values,
-        active:true,
+        active: true,
         dob: values.dob ? values.dob.toISOString() : null,
       };
-      
-      console.log(values);
+
       if (isEditing) {
-        await dispatch(updateUser({ id, data: submitData })).unwrap();
+        const initial = {
+          email: currentUser.email || '',
+          phone_number: currentUser.phone_number || '',
+          firstName: currentUser.userDetails?.firstName || '',
+          lastName: currentUser.userDetails?.lastName || '',
+          gender: currentUser.userDetails?.gender || '',
+          active: true,
+          blocked: currentUser.blocked ?? false,
+          dob: currentUser.dob || null,
+          role_id: currentUser.roleDetails?.id || undefined,
+        };
+        const payload = getDirtyValues(submitData, initial);
+        if (Object.keys(payload).length === 0) {
+          message.success(t('users.updateSuccess'));
+          navigate('/users');
+          return;
+        }
+        await dispatch(updateUser({ id, data: payload })).unwrap();
         message.success(t('users.updateSuccess'));
       } else {
         await dispatch(createUser(submitData)).unwrap();

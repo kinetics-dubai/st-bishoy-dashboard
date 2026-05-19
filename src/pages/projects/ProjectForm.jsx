@@ -9,6 +9,7 @@ import Base64ImageUpload from '@/components/Base64ImageUpload';
 import FormPageLayout from '@/components/FormPageLayout';
 import FormSection from '@/components/FormSection';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
+import { getDirtyValues } from '@/lib/formUtils';
 
 const { TextArea } = Input;
 
@@ -51,20 +52,30 @@ export default function ProjectForm() {
         title_ar: values.title_ar?.trim(),
         description: values.description?.trim() || '',
         description_ar: values.description_ar?.trim() || '',
+        thumbnail: values.thumbnail || '',
       };
 
-      if (values.thumbnail?.startsWith('data:')) {
-        data.thumbnail = values.thumbnail;
-      } else if (!isEditMode && values.thumbnail) {
-        data.thumbnail = values.thumbnail;
-      }
-
       if (isEditMode) {
-        await dispatch(updateProject({ id, data })).unwrap();
+        const initial = {
+          title: currentProject.title?.trim() || '',
+          title_ar: currentProject.title_ar?.trim() || '',
+          description: currentProject.description?.trim() || '',
+          description_ar: currentProject.description_ar?.trim() || '',
+          thumbnail: currentProject.thumbnail || '',
+        };
+        const payload = getDirtyValues(data, initial);
+        if (Object.keys(payload).length === 0) {
+          message.success(t('projects.updateSuccess'));
+          navigate('/projects');
+          return;
+        }
+        await dispatch(updateProject({ id, data: payload })).unwrap();
         message.success(t('projects.updateSuccess'));
         navigate('/projects');
       } else {
-        const response = await dispatch(createProject(data)).unwrap();
+        const createData = { ...data };
+        if (!createData.thumbnail) delete createData.thumbnail;
+        const response = await dispatch(createProject(createData)).unwrap();
         message.success(t('projects.createSuccess'));
         navigate(`/projects/${response.id}`);
       }

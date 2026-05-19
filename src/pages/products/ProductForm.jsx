@@ -10,6 +10,7 @@ import FormPageLayout from '@/components/FormPageLayout';
 import FormSection from '@/components/FormSection';
 import apiService from '@/services/apiService';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { getDirtyValues } from '@/lib/formUtils';
 
 const { TextArea } = Input;
 
@@ -95,20 +96,31 @@ export default function ProductForm() {
         description: values.description?.trim() || '',
         description_ar: values.description_ar?.trim() || '',
         categoryId: values.categoryId,
+        image: values.image || '',
       };
 
-      if (values.image?.startsWith('data:')) {
-        data.image = values.image;
-      } else if (!isEditMode && values.image) {
-        data.image = values.image;
-      }
-
       if (isEditMode) {
-        await dispatch(updateProduct({ id: currentProduct.id, data })).unwrap();
+        const initial = {
+          title: currentProduct.title?.trim() || '',
+          title_ar: currentProduct.title_ar?.trim() || '',
+          description: currentProduct.description?.trim() || '',
+          description_ar: currentProduct.description_ar?.trim() || '',
+          categoryId: currentProduct.categoryId || undefined,
+          image: currentProduct.image || '',
+        };
+        const payload = getDirtyValues(data, initial);
+        if (Object.keys(payload).length === 0) {
+          message.success(t('products.updateSuccess'));
+          navigate('/products');
+          return;
+        }
+        await dispatch(updateProduct({ id: currentProduct.id, data: payload })).unwrap();
         message.success(t('products.updateSuccess'));
         navigate('/products');
       } else {
-        const response = await dispatch(createProduct(data)).unwrap();
+        const createData = { ...data };
+        if (!createData.image) delete createData.image;
+        const response = await dispatch(createProduct(createData)).unwrap();
         message.success(t('products.createSuccess'));
         navigate(`/products/${response.slug}`);
       }

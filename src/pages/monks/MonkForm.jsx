@@ -6,6 +6,7 @@ import { Form, Input, Button, Select, Switch, message, Row, Col } from 'antd';
 import { UserOutlined, FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { fetchMonk, createMonk, updateMonk, clearCurrentMonk } from '@/store/monksSlice';
 import { getRankOptions } from '@/lib/ranks';
+import { getDirtyValues } from '@/lib/formUtils';
 import FormPageLayout from '@/components/FormPageLayout';
 import FormSection from '@/components/FormSection';
 
@@ -65,7 +66,23 @@ export default function MonkForm() {
       };
 
       if (isEditMode) {
-        await dispatch(updateMonk({ id, data })).unwrap();
+        const initial = {
+          name: normalizeText(currentMonk.name || ''),
+          name_ar: normalizeText(currentMonk.name_ar || ''),
+          ...(currentMonk.rank ? { rank: currentMonk.rank } : {}),
+          position: normalizeText(currentMonk.position || ''),
+          position_ar: normalizeText(currentMonk.position_ar || ''),
+          bio: normalizeText(currentMonk.bio) || '',
+          bio_ar: normalizeText(currentMonk.bio_ar) || '',
+          departed: currentMonk.departed ?? false,
+        };
+        const payload = getDirtyValues(data, initial);
+        if (Object.keys(payload).length === 0) {
+          message.info(t('common.noChanges', 'No changes to save'));
+          navigate('/monks');
+          return;
+        }
+        await dispatch(updateMonk({ id, data: payload })).unwrap();
         message.success(t('monk.monkUpdated'));
         navigate('/monks');
       } else {

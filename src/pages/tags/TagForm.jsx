@@ -5,6 +5,7 @@ import { Form, Input, Button, Card, message, Space, Select, Typography, Alert } 
 import { ArrowLeftOutlined, SaveOutlined, TagOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { createTag, updateTag, fetchTag, clearError } from '@/store/tagsSlice';
+import { getDirtyValues } from '@/lib/formUtils';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -85,7 +86,18 @@ const TagForm = () => {
       };
 
       if (isEditing) {
-        await dispatch(updateTag({ id, data: submitData })).unwrap();
+        const initial = {
+          name: currentTag.name || '',
+          category: currentTag.category || '',
+          slug: currentTag.slug || '',
+        };
+        const payload = getDirtyValues(submitData, initial);
+        if (Object.keys(payload).length === 0) {
+          message.info(t('common.noChanges', 'No changes to save'));
+          navigate('/tags');
+          return;
+        }
+        await dispatch(updateTag({ id, data: payload })).unwrap();
         message.success(t('tags.updateSuccess'));
       } else {
         await dispatch(createTag(submitData)).unwrap();

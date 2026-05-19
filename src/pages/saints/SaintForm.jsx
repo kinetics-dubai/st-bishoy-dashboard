@@ -6,6 +6,7 @@ import { UserOutlined, PictureOutlined, FileTextOutlined, BookOutlined } from '@
 import { ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { clearCurrentSaint, createSaint, fetchSaint, updateSaint } from '@/store/saintsSlice';
+import { getDirtyValues } from '@/lib/formUtils';
 import Base64ImageUpload from '@/components/Base64ImageUpload';
 import FormPageLayout from '@/components/FormPageLayout';
 import FormSection from '@/components/FormSection';
@@ -73,7 +74,27 @@ export default function SaintForm() {
 
     try {
       if (isEditMode) {
-        await dispatch(updateSaint({ id, data: payload })).unwrap();
+        const hasDetailsInitial = currentSaint.hasDetails ?? false;
+        const initial = {
+          name: currentSaint.name?.trim() || '',
+          name_ar: currentSaint.name_ar?.trim() || '',
+          ...(currentSaint.rank ? { rank: currentSaint.rank } : {}),
+          departed: currentSaint.departed ?? false,
+          image: currentSaint.image || '',
+          description: currentSaint.description?.trim() || '',
+          hasDetails: hasDetailsInitial,
+          first_paragraph: hasDetailsInitial ? currentSaint.first_paragraph?.trim() || '' : '',
+          first_image: hasDetailsInitial ? currentSaint.first_image || '' : '',
+          second_paragraph: hasDetailsInitial ? currentSaint.second_paragraph?.trim() || '' : '',
+          second_image: hasDetailsInitial ? currentSaint.second_image || '' : '',
+        };
+        const dirtyPayload = getDirtyValues(payload, initial);
+        if (Object.keys(dirtyPayload).length === 0) {
+          message.info(t('common.noChanges', 'No changes to save'));
+          navigate(`/saints/${id}`);
+          return;
+        }
+        await dispatch(updateSaint({ id, data: dirtyPayload })).unwrap();
         message.success(t('saints.updateSuccess'));
         navigate(`/saints/${id}`);
         return;

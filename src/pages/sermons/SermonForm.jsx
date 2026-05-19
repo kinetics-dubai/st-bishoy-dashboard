@@ -6,6 +6,7 @@ import { Form, Input, Row, Col, DatePicker, message } from 'antd';
 import { SoundOutlined, LinkOutlined, CalendarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { fetchSermon, createSermon, updateSermon, clearCurrentSermon } from '@/store/sermonsSlice';
+import { getDirtyValues } from '@/lib/formUtils';
 import FormPageLayout from '@/components/FormPageLayout';
 import FormSection from '@/components/FormSection';
 
@@ -49,7 +50,19 @@ export default function SermonForm() {
       };
 
       if (isEditMode) {
-        await dispatch(updateSermon({ id, data })).unwrap();
+        const initial = {
+          title: currentSermon.title?.trim() || '',
+          title_ar: currentSermon.title_ar?.trim() || '',
+          date: currentSermon.date || '',
+          video_url: currentSermon.video_url?.trim() || '',
+        };
+        const payload = getDirtyValues(data, initial);
+        if (Object.keys(payload).length === 0) {
+          message.info(t('common.noChanges', 'No changes to save'));
+          navigate('/sermons');
+          return;
+        }
+        await dispatch(updateSermon({ id, data: payload })).unwrap();
         message.success(t('sermons.updateSuccess'));
         navigate('/sermons');
       } else {

@@ -32,6 +32,7 @@ import Base64ImageUpload from "@/components/Base64ImageUpload";
 import FormPageLayout from "@/components/FormPageLayout";
 import FormSection from "@/components/FormSection";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
+import { getDirtyValues } from "@/lib/formUtils";
 import { ImageIcon } from "lucide-react";
 
 const { TextArea } = Input;
@@ -190,7 +191,39 @@ export default function EntityForm() {
       };
 
       if (isEditing) {
-        await dispatch(updateEntity({ id: currentEntity?.id || id, data: payload })).unwrap();
+        const hasDetailsInitial = currentEntity.hasDetails ?? false;
+        const initial = {
+          name: normalizeText(currentEntity.name),
+          name_ar: normalizeText(currentEntity.name_ar),
+          excerpt: normalizeText(currentEntity.excerpt),
+          excerpt_ar: normalizeText(currentEntity.excerpt_ar),
+          cover_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.cover_image) : null,
+          overview_description: hasDetailsInitial ? normalizeOptionalText(currentEntity.overview_description) : null,
+          overview_description_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.overview_description_ar) : null,
+          overview_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.overview_image) : null,
+          entity_history: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_history) : null,
+          entity_history_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_history_ar) : null,
+          entity_history_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.entity_history_image) : null,
+          entity_description: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_description) : null,
+          entity_description_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_description_ar) : null,
+          entity_description_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.entity_description_image) : null,
+          entity_location_description: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_location_description) : null,
+          entity_location_description_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_location_description_ar) : null,
+          entity_landmarks_description: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_landmarks_description) : null,
+          entity_landmarks_description_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_landmarks_description_ar) : null,
+          entity_landmarks_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.entity_landmarks_image) : null,
+          thumbnail: normalizeOptionalValue(currentEntity.thumbnail),
+          hasDetails: hasDetailsInitial,
+          sections: [],
+          parentId: currentEntity.parentId || null,
+        };
+        const dirtyPayload = getDirtyValues(payload, initial);
+        if (Object.keys(dirtyPayload).length === 0) {
+          message.success(t("entities.updateSuccess"));
+          navigate(`/entities/${currentEntity?.id || id}`);
+          return;
+        }
+        await dispatch(updateEntity({ id: currentEntity?.id || id, data: dirtyPayload })).unwrap();
         message.success(t("entities.updateSuccess"));
         navigate(`/entities/${currentEntity?.id || id}`);
         return;
