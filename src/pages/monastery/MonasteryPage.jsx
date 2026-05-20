@@ -633,17 +633,24 @@ export default function MonasteryPage() {
         }
       }
 
+      if (payload.monastery_development_images) {
+        payload.monastery_development_images =
+          payload.monastery_development_images.map((item) => ({
+            caption: item.caption,
+            caption_ar: item.caption_ar,
+            image: item.image,
+          }));
+      }
+
       if (!Object.keys(payload).length) {
         message.info(t("common.noChanges"));
         setSaving(false);
         return;
       }
 
-      const response = await apiService.put("/monastery", payload);
-      const nextBaselineSource = response?.data?.data
-        ? response.data
-        : { ...initialMonastery, ...nextValues, ...payload, id: monasteryId };
-      const normalizedMonastery = normalizeMonastery(nextBaselineSource);
+      await apiService.put("/monastery", payload);
+      const refreshResponse = await apiService.get("/monastery");
+      const normalizedMonastery = normalizeMonastery(refreshResponse.data);
 
       setMonasteryId(normalizedMonastery.id || monasteryId);
       setInitialMonastery(normalizedMonastery);

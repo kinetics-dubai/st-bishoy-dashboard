@@ -8,6 +8,7 @@ import { ShoppingOutlined } from '@ant-design/icons';
 import { Search } from 'lucide-react';
 import { fetchProducts, deleteProduct, setProductsPage, setProductsLimit } from '@/store/productsSlice';
 import CenteredLoader from '@/components/CenteredLoader';
+import { resolveMediaUrl } from '@/lib/mediaUrl';
 
 export default function ProductsList() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function ProductsList() {
       width: 80,
       render: (_, record) =>
         record.image ? (
-          <Avatar shape="square" size={48} src={record.image} alt={getTitle(record)} />
+          <Avatar shape="square" size={48} src={resolveMediaUrl(record.image)} alt={getTitle(record)} />
         ) : (
           <Avatar shape="square" size={48} icon={<ShoppingOutlined />} />
         ),

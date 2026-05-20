@@ -8,7 +8,6 @@ import {
   Input,
   Menu,
   Row,
-  Space,
   Spin,
   Typography,
   message,
@@ -68,12 +67,38 @@ function normalizeOptionalValue(value) {
 function normalizeHome(payload) {
   const rawHome = payload?.data ?? payload ?? {};
   const hero = rawHome.hero ?? {};
-  const spiritualVerse = rawHome.spiritual_verse ?? {};
+  const spiritualVerseRaw = rawHome.spiritual_verse ?? {};
   const about = rawHome.about ?? {};
   const stBishoyBio = rawHome.st_bishoy_bio ?? {};
   const monastery = rawHome.monastery ?? {};
   const area = rawHome.area ?? {};
   const papa = rawHome.papa ?? {};
+
+  const parseSpiritualVerseString = (value) => {
+    const normalized = normalizeText(value);
+    if (!normalized) return { chapter: "", verse: "" };
+
+    const lines = normalized.split(/\r?\n/);
+    if (lines.length >= 2) {
+      return {
+        chapter: normalizeText(lines[0]),
+        verse: normalizeText(lines.slice(1).join("\n")),
+      };
+    }
+
+    return { chapter: "", verse: normalized };
+  };
+
+  const spiritualVerse =
+    typeof spiritualVerseRaw === "string"
+      ? parseSpiritualVerseString(spiritualVerseRaw)
+      : spiritualVerseRaw ?? {};
+
+  const spiritualVerseArString = rawHome.spiritual_verse_ar;
+  const spiritualVerseAr =
+    typeof spiritualVerseArString === "string"
+      ? parseSpiritualVerseString(spiritualVerseArString)
+      : {};
 
   return {
     ...DEFAULT_HOME,
@@ -93,9 +118,10 @@ function normalizeHome(payload) {
     hero_monastery_hours: hero.monastery_hours ?? "",
     hero_monastery_hours_ar: hero.monastery_hours_ar ?? "",
     spiritual_verse_verse: spiritualVerse.verse ?? "",
-    spiritual_verse_verse_ar: spiritualVerse.verse_ar ?? "",
+    spiritual_verse_verse_ar: spiritualVerse.verse_ar ?? spiritualVerseAr.verse ?? "",
     spiritual_verse_chapter: spiritualVerse.chapter ?? "",
-    spiritual_verse_chapter_ar: spiritualVerse.chapter_ar ?? "",
+    spiritual_verse_chapter_ar:
+      spiritualVerse.chapter_ar ?? spiritualVerseAr.chapter ?? "",
     about_text: about.text ?? "",
     about_text_ar: about.text_ar ?? "",
     about_image: about.image ?? "",
@@ -283,7 +309,7 @@ export default function HomePage() {
       );
 
       const nextValues = buildHomePayload(values);
-      const payload = {};
+      let payload = {};
       const sectionFields = SECTION_FIELDS[activeSection] ?? [];
 
       for (const [key, value] of Object.entries(nextValues)) {
@@ -300,11 +326,35 @@ export default function HomePage() {
         return;
       }
 
-      const response = await apiService.put("/home", payload);
-      const nextBaselineSource = response?.data?.data
-        ? response.data
-        : { ...initialHome, ...nextValues, ...payload, id: homeId };
-      const normalizedHome = normalizeHome(nextBaselineSource);
+      if (activeSection === "spiritual_verse") {
+        const serializeSpiritualVerse = (verse, chapter) => {
+          const normalizedVerse = normalizeText(verse);
+          const normalizedChapter = normalizeText(chapter);
+
+          if (!normalizedVerse && !normalizedChapter) return "";
+          if (normalizedVerse && normalizedChapter) {
+            return `${normalizedChapter}\n${normalizedVerse}`;
+          }
+
+          return normalizedChapter || normalizedVerse;
+        };
+
+        const spiritualVerse = serializeSpiritualVerse(
+          nextValues.spiritual_verse_verse,
+          nextValues.spiritual_verse_chapter,
+        );
+        const spiritualVerseAr = serializeSpiritualVerse(
+          nextValues.spiritual_verse_verse_ar,
+          nextValues.spiritual_verse_chapter_ar,
+        );
+
+        payload = { spiritual_verse: spiritualVerse };
+        if (spiritualVerseAr) payload.spiritual_verse_ar = spiritualVerseAr;
+      }
+
+      await apiService.put("/home", payload);
+      const refreshResponse = await apiService.get("/home");
+      const normalizedHome = normalizeHome(refreshResponse.data);
       setHomeId(normalizedHome.id || homeId);
       setInitialHome(normalizedHome);
       form.setFieldsValue(normalizedHome);

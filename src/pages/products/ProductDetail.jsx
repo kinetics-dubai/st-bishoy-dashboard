@@ -6,6 +6,7 @@ import { Card, Button, Space, Popconfirm, Empty, Descriptions, Typography, Tag, 
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { fetchProduct, deleteProduct } from '@/store/productsSlice';
 import CenteredLoader from '@/components/CenteredLoader';
+import { resolveMediaUrl } from '@/lib/mediaUrl';
 
 const { Title } = Typography;
 
@@ -63,7 +64,7 @@ export default function ProductDetail() {
         {currentProduct.image && (
           <div style={{ marginBottom: '24px' }}>
             <img
-              src={currentProduct.image}
+              src={resolveMediaUrl(currentProduct.image)}
               alt={displayTitle}
               style={{ maxWidth: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 8 }}
             />

@@ -11,6 +11,7 @@ import FormSection from '@/components/FormSection';
 import apiService from '@/services/apiService';
 import { getApiErrorMessage } from '@/lib/apiError';
 import { getDirtyValues } from '@/lib/formUtils';
+import { resolveMediaUrl } from '@/lib/mediaUrl';
 
 const { TextArea } = Input;
 
@@ -227,12 +228,36 @@ export default function ProductForm() {
         <FormSection icon={<FileTextOutlined />} title={t('products.description')}>
           <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
-              <Form.Item label={t('products.description')} name="description">
+              <Form.Item
+                label={t('products.description')}
+                name="description"
+                rules={[
+                  { required: true, message: t('validation.required') },
+                  {
+                    validator: (_, value) =>
+                      String(value ?? '').trim().length
+                        ? Promise.resolve()
+                        : Promise.reject(new Error(t('validation.required'))),
+                  },
+                ]}
+              >
                 <TextArea rows={5} placeholder={t('products.descriptionPlaceholder')} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label={t('products.description_ar')} name="description_ar">
+              <Form.Item
+                label={t('products.description_ar')}
+                name="description_ar"
+                rules={[
+                  { required: true, message: t('validation.required') },
+                  {
+                    validator: (_, value) =>
+                      String(value ?? '').trim().length
+                        ? Promise.resolve()
+                        : Promise.reject(new Error(t('validation.required'))),
+                  },
+                ]}
+              >
                 <TextArea rows={5} dir="rtl" placeholder={t('products.descriptionArPlaceholder')} />
               </Form.Item>
             </Col>
@@ -242,7 +267,18 @@ export default function ProductForm() {
         <FormSection icon={<PictureOutlined />} title={t('products.image')}>
           <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
-              <Form.Item name="image">
+              <Form.Item
+                name="image"
+                rules={[
+                  { required: true, message: t('validation.required') },
+                  {
+                    validator: (_, value) =>
+                      typeof value === 'string' && value.trim().length
+                        ? Promise.resolve()
+                        : Promise.reject(new Error(t('validation.required'))),
+                  },
+                ]}
+              >
                 <Base64ImageUpload
                   buttonLabel={t('products.uploadImage')}
                   emptyLabel={t('products.noImage')}
@@ -254,7 +290,7 @@ export default function ProductForm() {
             {watchedImage && (
               <Col xs={24} md={12}>
                 <img
-                  src={watchedImage}
+                  src={resolveMediaUrl(watchedImage)}
                   alt="preview"
                   style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8 }}
                 />

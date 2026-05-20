@@ -8,7 +8,7 @@ export const httpClient = axios.create({
   headers: { 
     'Content-Type': 'application/json' 
   },
-  timeout: 10000,
+  // timeout: 10000,
 });
 
 // Request interceptor - Add auth token to all requests

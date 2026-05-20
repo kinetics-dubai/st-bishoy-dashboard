@@ -26,6 +26,8 @@ export default function Base64ImageUpload({
   emptyLabel,
   removeLabel,
   errorLabel,
+  maxSizeMB = 5,
+  maxSizeErrorLabel,
   accept = 'image/*',
 }) {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -33,6 +35,15 @@ export default function Base64ImageUpload({
   const [reading, setReading] = useState(false);
 
   const handleBeforeUpload = async (file) => {
+    const maxBytes = Number(maxSizeMB) * 1024 * 1024;
+    if (Number.isFinite(maxBytes) && maxBytes > 0 && file?.size > maxBytes) {
+      message.error(
+        maxSizeErrorLabel ||
+          `Image is too large. Max size is ${maxSizeMB} MB.`,
+      );
+      return false;
+    }
+
     try {
       setReading(true);
       setReadingPct(0);
@@ -71,7 +82,7 @@ export default function Base64ImageUpload({
           }}
         />
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div
           style={{
             width: 44,
@@ -107,13 +118,21 @@ export default function Base64ImageUpload({
           )}
         </div>
 
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <Text style={{ color: 'rgba(107,26,26,0.88)' }}>
+        <div style={{ minWidth: 160, flex: '1 1 160px' }}>
+          <Text
+            style={{
+              color: 'rgba(107,26,26,0.88)',
+              display: 'block',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {hasValue ? buttonLabel : emptyLabel}
           </Text>
         </div>
 
-        <Space size={6} style={{ flex: '0 0 auto' }}>
+        <Space size={6} style={{ flex: '0 0 auto', marginLeft: 'auto' }} wrap>
           <Upload
             accept={accept}
             maxCount={1}

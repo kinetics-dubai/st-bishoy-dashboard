@@ -175,7 +175,10 @@ export default function MonkForm() {
               <Form.Item
                 label={t('monk.bio')}
                 name="bio"
-                rules={[{ max: 2000, message: t('validation.maxLength', { field: t('monk.bio'), max: 2000 }) }]}
+                rules={[
+                  { required: true, message: t('validation.required', { field: t('monk.bio') }) },
+                  { max: 2000, message: t('validation.maxLength', { field: t('monk.bio'), max: 2000 }) },
+                ]}
               >
                 <TextArea rows={6} placeholder={t('monk.bioPlaceholder')} showCount maxLength={2000} />
               </Form.Item>

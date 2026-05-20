@@ -36,6 +36,7 @@ export default function ProjectsList() {
       title: t('projects.thumbnail'),
       key: 'thumbnail',
       width: 80,
+      align: 'center',
       render: (_, record) =>
         record.thumbnail ? (
           <Avatar

@@ -186,6 +186,11 @@
     "nameArPlaceholder": "أدخل اسم اللجنة"
   },
   "monk": {
+    "pageTitle": "الرهبان",
+    "createTitle": "إنشاء راهب",
+    "editTitle": "تعديل راهب",
+    "detailTitle": "ملف الراهب",
+    "ecclesiasticalRank": "الرتبة الكنسية",
     "filterByRank": "تصفية حسب المنصب",
     "clearFilters": "مسح الفلاتر",
     "searchPlaceholder": "بحث في الرهبان...",
