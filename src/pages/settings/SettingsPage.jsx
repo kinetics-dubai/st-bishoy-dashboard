@@ -91,7 +91,7 @@ const SettingsPage = () => {
       ...updates,
     };
 
-    const response = await apiService.patch('/settings', payload);
+    const response = await apiService.put('/settings', payload);
     const nextSettings = normalizeSettings(response?.data?.data ? response.data : { data: payload });
 
     setSettings(nextSettings);

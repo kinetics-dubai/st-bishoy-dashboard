@@ -23,6 +23,7 @@ import {
   PlusOutlined,
   DeleteOutlined,
   PictureOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import {
@@ -143,6 +144,7 @@ export default function EntityForm() {
       entity_landmarks_description_ar: currentEntity.entity_landmarks_description_ar || "",
       entity_landmarks_image: currentEntity.entity_landmarks_image || "",
       thumbnail: currentEntity.thumbnail || "",
+      vr_url: currentEntity.vr_url || "",
       hasDetails: currentEntity.hasDetails ?? false,
       parentId: currentEntity.parentId ?? undefined,
       gallery: currentEntity.gallery
@@ -212,6 +214,7 @@ export default function EntityForm() {
               })),
             }
           : null,
+        vr_url: hasDetails ? normalizeOptionalText(values.vr_url) : null,
         thumbnail: normalizeOptionalValue(values.thumbnail),
         hasDetails,
         sections: [],
@@ -254,6 +257,7 @@ export default function EntityForm() {
                 }
               : { title: null, title_ar: null, items: [] }
             : null,
+          vr_url: hasDetailsInitial ? normalizeOptionalText(currentEntity.vr_url) : null,
           thumbnail: normalizeOptionalValue(currentEntity.thumbnail),
           hasDetails: hasDetailsInitial,
           sections: [],
@@ -313,6 +317,7 @@ export default function EntityForm() {
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{ hasDetails: false }}
+        scrollToFirstError
       >
         <FormSection icon={<HomeOutlined />} title={t("entities.basicInfo")}>
           <Row gutter={[24, 0]}>
@@ -635,6 +640,20 @@ export default function EntityForm() {
                   </div>
                 )}
               </Form.List>
+            </FormSection>
+
+            <FormSection icon={<LinkOutlined />} title={t("entities.vrSection")}>
+              <Row gutter={[24, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="vr_url"
+                    label={t("entities.vrUrl")}
+                    rules={[{ type: "url", message: t("validation.url") }]}
+                  >
+                    <Input placeholder={t("entities.vrUrlPlaceholder")} size="large" />
+                  </Form.Item>
+                </Col>
+              </Row>
             </FormSection>
           </>
         )}

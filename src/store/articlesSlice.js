@@ -44,7 +44,7 @@ export const updateArticle = createAsyncThunk(
   'articles/updateArticle',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch(`/articles/${id}`, data);
+      const response = await apiService.put(`/articles/${id}`, data);
       return response.data?.data || response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

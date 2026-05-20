@@ -64,7 +64,7 @@ export const updateSaint = createAsyncThunk(
   'saints/updateSaint',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch(`/saints/${id}`, data);
+      const response = await apiService.put(`/saints/${id}`, data);
       return normalizeSaint(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

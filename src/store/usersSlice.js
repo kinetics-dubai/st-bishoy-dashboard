@@ -46,7 +46,7 @@ export const updateUser = createAsyncThunk(
   'users/updateUser',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch('/users', data, {
+      const response = await apiService.put('/users', data, {
         params: { id }
       });
       return response.data?.user;

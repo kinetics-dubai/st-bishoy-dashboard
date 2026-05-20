@@ -65,7 +65,7 @@ export const updateTag = createAsyncThunk(
   'tags/updateTag',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiService.patch(`/tags/${id}`, data);
+      const response = await apiService.put(`/tags/${id}`, data);
       return normalizeTag(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

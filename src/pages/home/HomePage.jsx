@@ -89,10 +89,50 @@ function normalizeHome(payload) {
     return { chapter: "", verse: normalized };
   };
 
+  const normalizeSpiritualVerseObject = (value) => {
+    const obj = value && typeof value === "object" ? value : {};
+
+    let chapter = normalizeText(obj.chapter);
+    let verse = normalizeText(obj.verse);
+    if (verse) {
+      const parsed = parseSpiritualVerseString(verse);
+      if (
+        parsed.chapter &&
+        parsed.verse &&
+        (!chapter || chapter === parsed.chapter)
+      ) {
+        chapter = chapter || parsed.chapter;
+        verse = parsed.verse;
+      }
+    }
+
+    let chapterAr = normalizeText(obj.chapter_ar);
+    let verseAr = normalizeText(obj.verse_ar);
+    if (verseAr) {
+      const parsedAr = parseSpiritualVerseString(verseAr);
+      if (
+        parsedAr.chapter &&
+        parsedAr.verse &&
+        (!chapterAr || chapterAr === parsedAr.chapter)
+      ) {
+        chapterAr = chapterAr || parsedAr.chapter;
+        verseAr = parsedAr.verse;
+      }
+    }
+
+    return {
+      ...obj,
+      chapter,
+      verse,
+      chapter_ar: chapterAr,
+      verse_ar: verseAr,
+    };
+  };
+
   const spiritualVerse =
     typeof spiritualVerseRaw === "string"
       ? parseSpiritualVerseString(spiritualVerseRaw)
-      : spiritualVerseRaw ?? {};
+      : normalizeSpiritualVerseObject(spiritualVerseRaw);
 
   const spiritualVerseArString = rawHome.spiritual_verse_ar;
   const spiritualVerseAr =
