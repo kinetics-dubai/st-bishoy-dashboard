@@ -77,6 +77,7 @@ function normalizeEntity(entity) {
       typeof entity.childrenCount === "number"
         ? entity.childrenCount
         : normalizedChildren.length,
+    gallery: entity.gallery || null,
   };
 }
 

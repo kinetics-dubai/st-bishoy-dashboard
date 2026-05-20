@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Card,
@@ -14,12 +14,23 @@ import {
   Tag,
   Typography,
   message,
-} from 'antd';
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { clearCurrentEntity, deleteEntity, fetchEntities, fetchEntity } from '@/store/entitiesSlice';
-import { resolveMediaUrl } from '@/lib/mediaUrl';
-import { getApiErrorMessage } from '@/lib/apiError';
+} from "antd";
+import {
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  HomeOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import {
+  clearCurrentEntity,
+  deleteEntity,
+  fetchEntities,
+  fetchEntity,
+} from "@/store/entitiesSlice";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -32,7 +43,13 @@ function EntityImage({ src, alt, emptyText }) {
     <Image
       src={resolveMediaUrl(src)}
       alt={alt}
-      style={{ width: '100%', maxWidth: 420, maxHeight: 280, objectFit: 'cover', borderRadius: 12 }}
+      style={{
+        width: "100%",
+        maxWidth: 420,
+        maxHeight: 280,
+        objectFit: "cover",
+        borderRadius: 12,
+      }}
       fallback=""
     />
   );
@@ -43,7 +60,9 @@ export default function EntityDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-  const { currentEntity, entities, loading, deleting, error } = useSelector((state) => state.entities);
+  const { currentEntity, entities, loading, deleting, error } = useSelector(
+    (state) => state.entities,
+  );
 
   useEffect(() => {
     if (id) {
@@ -56,34 +75,39 @@ export default function EntityDetail() {
   }, [dispatch, id]);
 
   useEffect(() => {
-    if (!currentEntity?.parentId || currentEntity.parent || entities.length > 0) return;
+    if (!currentEntity?.parentId || currentEntity.parent || entities.length > 0)
+      return;
     dispatch(fetchEntities({ page: 1, limit: 100 }));
   }, [currentEntity, dispatch, entities.length]);
 
   const displayName =
-    i18n.language === 'ar' && currentEntity?.name_ar ? currentEntity.name_ar : currentEntity?.name;
+    i18n.language === "ar" && currentEntity?.name_ar
+      ? currentEntity.name_ar
+      : currentEntity?.name;
   const resolvedParent =
     currentEntity?.parent ||
-    entities.find((entity) => String(entity.id) === String(currentEntity?.parentId)) ||
+    entities.find(
+      (entity) => String(entity.id) === String(currentEntity?.parentId),
+    ) ||
     null;
 
   const handleDeleteEntity = () => {
     Modal.confirm({
-      title: t('entities.deleteConfirm'),
-      content: t('entities.deleteConfirmMessage', {
-        name: displayName || currentEntity?.name || t('common.notAvailable'),
+      title: t("entities.deleteConfirm"),
+      content: t("entities.deleteConfirmMessage", {
+        name: displayName || currentEntity?.name || t("common.notAvailable"),
       }),
-      okText: t('common.delete'),
-      okType: 'danger',
-      cancelText: t('common.cancel'),
+      okText: t("common.delete"),
+      okType: "danger",
+      cancelText: t("common.cancel"),
       onOk: async () => {
-        message.info(t('entities.deleteCascadeNotice'));
+        message.info(t("entities.deleteCascadeNotice"));
         try {
           await dispatch(deleteEntity(currentEntity.id)).unwrap();
-          message.success(t('entities.deleteSuccess'));
-          navigate('/entities');
+          message.success(t("entities.deleteSuccess"));
+          navigate("/entities");
         } catch (err) {
-          message.error(getApiErrorMessage(err, t('entities.deleteError')));
+          message.error(getApiErrorMessage(err, t("entities.deleteError")));
         }
       },
     });
@@ -93,7 +117,7 @@ export default function EntityDetail() {
 
   if (loading && !currentEntity) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
+      <div style={{ padding: "24px", textAlign: "center" }}>
         <Spin size="large" />
       </div>
     );
@@ -101,40 +125,64 @@ export default function EntityDetail() {
 
   if (!currentEntity) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div style={{ padding: "24px" }}>
         <Card>
-          <Empty description={error || t('entities.notFound')} />
+          <Empty description={error || t("entities.notFound")} />
         </Card>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '24px' }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+    <div style={{ padding: "24px" }}>
+      <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "16px",
+              flexWrap: "wrap",
+            }}
+          >
             <Space align="start" size={16}>
-              <EntityImage src={currentEntity.thumbnail || currentEntity.cover_image} alt={displayName} emptyText={t('entities.noImage')} />
+              <EntityImage
+                src={currentEntity.thumbnail || currentEntity.cover_image}
+                alt={displayName}
+                emptyText={t("entities.noImage")}
+              />
               <div>
-                <Space align="center" style={{ marginBottom: '12px' }}>
-                  <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/entities')}>
-                    {t('common.back')}
+                <Space align="center" style={{ marginBottom: "12px" }}>
+                  <Button
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate("/entities")}
+                  >
+                    {t("common.back")}
                   </Button>
                   <Title level={2} style={{ margin: 0 }}>
-                    {displayName || t('entities.title')}
+                    {displayName || t("entities.title")}
                   </Title>
                 </Space>
                 <Space wrap>
-                  <Tag color={currentEntity.hasDetails ? 'success' : 'default'}>
-                    {t('entities.hasDetails')}: {currentEntity.hasDetails ? t('common.yes') : t('common.no')}
+                  <Tag color={currentEntity.hasDetails ? "success" : "default"}>
+                    {t("entities.hasDetails")}:{" "}
+                    {currentEntity.hasDetails
+                      ? t("common.yes")
+                      : t("common.no")}
                   </Tag>
                   {resolvedParent ? (
-                    <Button type="link" style={{ padding: 0 }} onClick={() => navigate(`/entities/${resolvedParent.id}`)}>
-                      {t('entities.parent')}: {i18n.language === 'ar' && resolvedParent.name_ar ? resolvedParent.name_ar : resolvedParent.name}
+                    <Button
+                      type="link"
+                      style={{ padding: 0 }}
+                      onClick={() => navigate(`/entities/${resolvedParent.id}`)}
+                    >
+                      {t("entities.parent")}:{" "}
+                      {i18n.language === "ar" && resolvedParent.name_ar
+                        ? resolvedParent.name_ar
+                        : resolvedParent.name}
                     </Button>
                   ) : (
-                    <Text type="secondary">{t('entities.noParent')}</Text>
+                    <Text type="secondary">{t("entities.noParent")}</Text>
                   )}
                 </Space>
               </div>
@@ -144,72 +192,102 @@ export default function EntityDetail() {
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                onClick={() => navigate(`/entities/create?parentId=${currentEntity.id}`)}
+                onClick={() =>
+                  navigate(`/entities/create?parentId=${currentEntity.id}`)
+                }
               >
-                {t('entities.addChild')}
+                {t("entities.addChild")}
               </Button>
-              <Button icon={<EditOutlined />} onClick={() => navigate(`/entities/${id}/edit`)}>
-                {t('common.edit')}
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => navigate(`/entities/${id}/edit`)}
+              >
+                {t("common.edit")}
               </Button>
-              <Button danger icon={<DeleteOutlined />} loading={deleting} onClick={handleDeleteEntity}>
-                {t('common.delete')}
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                loading={deleting}
+                onClick={handleDeleteEntity}
+              >
+                {t("common.delete")}
               </Button>
             </Space>
           </div>
         </Card>
 
-        <Card title={t('entities.summary')}>
+        <Card title={t("entities.summary")}>
           <Descriptions column={1} bordered>
-            <Descriptions.Item label={t('entities.name')}>
-              {currentEntity.name || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.name")}>
+              {currentEntity.name || t("common.notAvailable")}
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.nameAr')}>
-              {currentEntity.name_ar || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.nameAr")}>
+              {currentEntity.name_ar || t("common.notAvailable")}
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.excerpt')}>
-              <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                {currentEntity.excerpt || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.excerpt")}>
+              <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                {currentEntity.excerpt || t("common.notAvailable")}
               </Paragraph>
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.excerptAr')}>
-              <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                {currentEntity.excerpt_ar || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.excerptAr")}>
+              <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                {currentEntity.excerpt_ar || t("common.notAvailable")}
               </Paragraph>
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.thumbnail')}>
-              <EntityImage src={currentEntity.thumbnail} alt={displayName} emptyText={t('entities.noImage')} />
+            <Descriptions.Item label={t("entities.thumbnail")}>
+              <EntityImage
+                src={currentEntity.thumbnail}
+                alt={displayName}
+                emptyText={t("entities.noImage")}
+              />
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.coverImage')}>
-              <EntityImage src={currentEntity.cover_image} alt={displayName} emptyText={t('entities.noImage')} />
+            <Descriptions.Item label={t("entities.coverImage")}>
+              <EntityImage
+                src={currentEntity.cover_image}
+                alt={displayName}
+                emptyText={t("entities.noImage")}
+              />
             </Descriptions.Item>
           </Descriptions>
         </Card>
 
-        <Card title={t('entities.relationships')}>
-          <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <Card title={t("entities.relationships")}>
+          <Space direction="vertical" style={{ width: "100%" }} size="large">
             <div>
-              <Text strong>{t('entities.parent')}</Text>
+              <Text strong>{t("entities.parent")}</Text>
               <div style={{ marginTop: 8 }}>
                 {resolvedParent ? (
-                  <Button type="link" style={{ padding: 0 }} onClick={() => navigate(`/entities/${resolvedParent.id}`)}>
-                    {i18n.language === 'ar' && resolvedParent.name_ar ? resolvedParent.name_ar : resolvedParent.name}
+                  <Button
+                    type="link"
+                    style={{ padding: 0 }}
+                    onClick={() => navigate(`/entities/${resolvedParent.id}`)}
+                  >
+                    {i18n.language === "ar" && resolvedParent.name_ar
+                      ? resolvedParent.name_ar
+                      : resolvedParent.name}
                   </Button>
                 ) : (
-                  <Text type="secondary">{t('entities.noParent')}</Text>
+                  <Text type="secondary">{t("entities.noParent")}</Text>
                 )}
               </div>
             </div>
 
             <div>
-              <Text strong>{t('entities.children')}</Text>
+              <Text strong>{t("entities.children")}</Text>
               <List
                 style={{ marginTop: 8 }}
                 dataSource={childItems}
-                locale={{ emptyText: t('entities.noChildren') }}
+                locale={{ emptyText: t("entities.noChildren") }}
                 renderItem={(child) => (
                   <List.Item>
-                    <Button type="link" style={{ padding: 0 }} onClick={() => navigate(`/entities/${child.id}`)}>
-                      {i18n.language === 'ar' && child.name_ar ? child.name_ar : child.name}
+                    <Button
+                      type="link"
+                      style={{ padding: 0 }}
+                      onClick={() => navigate(`/entities/${child.id}`)}
+                    >
+                      {i18n.language === "ar" && child.name_ar
+                        ? child.name_ar
+                        : child.name}
                     </Button>
                   </List.Item>
                 )}
@@ -218,94 +296,216 @@ export default function EntityDetail() {
           </Space>
         </Card>
 
-        <Card title={t('entities.overviewSection')}>
+        <Card title={t("entities.overviewSection")}>
           <Descriptions column={1} bordered>
-            <Descriptions.Item label={t('entities.overviewDescription')}>
-              <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                {currentEntity.overview_description || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.overviewDescription")}>
+              <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                {currentEntity.overview_description || t("common.notAvailable")}
               </Paragraph>
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.overviewDescriptionAr')}>
-              <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                {currentEntity.overview_description_ar || t('common.notAvailable')}
+            <Descriptions.Item label={t("entities.overviewDescriptionAr")}>
+              <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                {currentEntity.overview_description_ar ||
+                  t("common.notAvailable")}
               </Paragraph>
             </Descriptions.Item>
-            <Descriptions.Item label={t('entities.overviewImage')}>
-              <EntityImage src={currentEntity.overview_image} alt={displayName} emptyText={t('entities.noImage')} />
+            <Descriptions.Item label={t("entities.overviewImage")}>
+              <EntityImage
+                src={currentEntity.overview_image}
+                alt={displayName}
+                emptyText={t("entities.noImage")}
+              />
             </Descriptions.Item>
           </Descriptions>
         </Card>
 
         {currentEntity.hasDetails ? (
           <>
-            <Card title={t('entities.historySection')}>
+            <Card title={t("entities.historySection")}>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('entities.entityHistory')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_history || t('common.notAvailable')}
+                <Descriptions.Item label={t("entities.entityHistory")}>
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_history || t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityHistoryAr')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_history_ar || t('common.notAvailable')}
+                <Descriptions.Item label={t("entities.entityHistoryAr")}>
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_history_ar ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityHistoryImage')}>
-                  <EntityImage src={currentEntity.entity_history_image} alt={displayName} emptyText={t('entities.noImage')} />
+                <Descriptions.Item label={t("entities.entityHistoryImage")}>
+                  <EntityImage
+                    src={currentEntity.entity_history_image}
+                    alt={displayName}
+                    emptyText={t("entities.noImage")}
+                  />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            <Card title={t('entities.descriptionSection')}>
+            <Card title={t("entities.descriptionSection")}>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('entities.entityDescription')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_description || t('common.notAvailable')}
+                <Descriptions.Item label={t("entities.entityDescription")}>
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_description ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityDescriptionAr')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_description_ar || t('common.notAvailable')}
+                <Descriptions.Item label={t("entities.entityDescriptionAr")}>
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_description_ar ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityDescriptionImage')}>
-                  <EntityImage src={currentEntity.entity_description_image} alt={displayName} emptyText={t('entities.noImage')} />
+                <Descriptions.Item label={t("entities.entityDescriptionImage")}>
+                  <EntityImage
+                    src={currentEntity.entity_description_image}
+                    alt={displayName}
+                    emptyText={t("entities.noImage")}
+                  />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            <Card title={t('entities.locationSection')}>
+            <Card title={t("entities.locationSection")}>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('entities.entityLocationDescription')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_location_description || t('common.notAvailable')}
+                <Descriptions.Item
+                  label={t("entities.entityLocationDescription")}
+                >
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_location_description ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityLocationDescriptionAr')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_location_description_ar || t('common.notAvailable')}
+                <Descriptions.Item
+                  label={t("entities.entityLocationDescriptionAr")}
+                >
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_location_description_ar ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            <Card title={t('entities.landmarksSection')}>
+            <Card title={t("entities.landmarksSection")}>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('entities.entityLandmarksDescription')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_landmarks_description || t('common.notAvailable')}
+                <Descriptions.Item
+                  label={t("entities.entityLandmarksDescription")}
+                >
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_landmarks_description ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityLandmarksDescriptionAr')}>
-                  <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
-                    {currentEntity.entity_landmarks_description_ar || t('common.notAvailable')}
+                <Descriptions.Item
+                  label={t("entities.entityLandmarksDescriptionAr")}
+                >
+                  <Paragraph
+                    style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}
+                  >
+                    {currentEntity.entity_landmarks_description_ar ||
+                      t("common.notAvailable")}
                   </Paragraph>
                 </Descriptions.Item>
-                <Descriptions.Item label={t('entities.entityLandmarksImage')}>
-                  <EntityImage src={currentEntity.entity_landmarks_image} alt={displayName} emptyText={t('entities.noImage')} />
+                <Descriptions.Item label={t("entities.entityLandmarksImage")}>
+                  <EntityImage
+                    src={currentEntity.entity_landmarks_image}
+                    alt={displayName}
+                    emptyText={t("entities.noImage")}
+                  />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
+
+            {currentEntity.gallery && (
+              <Card
+                title={
+                  <div>
+                    <div>{t("entities.gallerySection")}</div>
+                    {(currentEntity.gallery.title || currentEntity.gallery.title_ar) && (
+                      <div style={{ display: "flex", gap: 16, marginTop: 4, flexWrap: "wrap" }}>
+                        {currentEntity.gallery.title && (
+                          <Text style={{ fontWeight: 400, fontSize: 13, color: "rgba(0,0,0,0.55)" }}>
+                            {currentEntity.gallery.title}
+                          </Text>
+                        )}
+                        {currentEntity.gallery.title_ar && (
+                          <Text style={{ fontWeight: 400, fontSize: 13, color: "rgba(0,0,0,0.45)" }} dir="rtl">
+                            {currentEntity.gallery.title_ar}
+                          </Text>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                }
+              >
+                {currentEntity.gallery.items?.length > 0 ? (
+                  <Image.PreviewGroup>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                        gap: 12,
+                      }}
+                    >
+                      {currentEntity.gallery.items.map((item, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            border: "1px solid rgba(107,26,26,0.12)",
+                            borderRadius: 10,
+                            overflow: "hidden",
+                            background: "#fdf9f4",
+                          }}
+                        >
+                          <div style={{ aspectRatio: "4/3", overflow: "hidden" }}>
+                            <Image
+                              src={resolveMediaUrl(item.image || item.path)}
+                              alt={item.caption || item.caption_ar || `Gallery image ${idx + 1}`}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              wrapperStyle={{ display: "block", width: "100%", height: "100%" }}
+                              fallback=""
+                            />
+                          </div>
+                          {(item.caption || item.caption_ar) && (
+                            <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(107,26,26,0.08)" }}>
+                              {item.caption && (
+                                <Text style={{ display: "block", fontSize: 13 }}>
+                                  {item.caption}
+                                </Text>
+                              )}
+                              {item.caption_ar && (
+                                <Text type="secondary" style={{ display: "block", fontSize: 12, marginTop: 2 }} dir="rtl">
+                                  {item.caption_ar}
+                                </Text>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </Image.PreviewGroup>
+                ) : (
+                  <Empty description={t("entities.noImage")} />
+                )}
+              </Card>
+            )}
           </>
         ) : null}
       </Space>
