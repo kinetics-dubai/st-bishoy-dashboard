@@ -10,35 +10,39 @@ import {
   Popconfirm,
   Empty,
   Input,
+  Select,
   message,
   Badge,
+  Tag,
 } from "antd";
 import {
   PlusOutlined,
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-  FileTextOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { Search } from "lucide-react";
+import dayjs from "dayjs";
 import {
-  fetchArticles,
-  deleteArticle,
-  setPage,
-  setLimit,
-} from "@/store/articlesSlice";
+  fetchEvents,
+  deleteEvent,
+  setEventsPage,
+  setEventsLimit,
+} from "@/store/eventsSlice";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
 import CenteredLoader from "@/components/CenteredLoader";
 
-export default function ArticlesList() {
+export default function EventsList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { articles, loading, error, deleting, page, limit, total } =
-    useSelector((state) => state.articles);
+  const { events, loading, error, deleting, page, limit, total } =
+    useSelector((state) => state.events);
 
   const [searchText, setSearchText] = useState("");
   const [searchDebounce, setSearchDebounce] = useState("");
+  const [publishedFilter, setPublishedFilter] = useState(undefined);
   const previousSearchRef = useRef("");
 
   useEffect(() => {
@@ -53,19 +57,21 @@ export default function ArticlesList() {
     const searchChanged = previousSearchRef.current !== searchDebounce;
     previousSearchRef.current = searchDebounce;
     if (searchChanged && page !== 1) {
-      dispatch(setPage(1));
+      dispatch(setEventsPage(1));
       return;
     }
-    dispatch(fetchArticles({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    const params = { page, limit, search: searchDebounce };
+    if (publishedFilter !== undefined) params.published = publishedFilter;
+    dispatch(fetchEvents(params));
+  }, [dispatch, page, limit, searchDebounce, publishedFilter]);
 
   const getTitle = (record) =>
     i18n.language === "ar" && record.title_ar ? record.title_ar : record.title;
 
   const handleDelete = async (id) => {
     try {
-      await dispatch(deleteArticle(id)).unwrap();
-      message.success(t("articles.deleteSuccess"));
+      await dispatch(deleteEvent(id)).unwrap();
+      message.success(t("events.deleteSuccess"));
     } catch (err) {
       message.error(err?.message || err?.detail || t("common.error"));
     }
@@ -73,7 +79,7 @@ export default function ArticlesList() {
 
   const columns = [
     {
-      title: t("articles.titleLabel"),
+      title: t("events.titleLabel"),
       key: "title",
       render: (_, record) => (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -102,7 +108,7 @@ export default function ArticlesList() {
                 justifyContent: "center",
               }}
             >
-              <FileTextOutlined style={{ color: "#fff", fontSize: 16 }} />
+              <CalendarOutlined style={{ color: "#fff", fontSize: 16 }} />
             </div>
           )}
           <span style={{ fontWeight: 500 }}>
@@ -112,16 +118,35 @@ export default function ArticlesList() {
       ),
     },
     {
-      title: t("articles.publishedLabel"),
+      title: t("events.startAtLabel"),
+      key: "start_at",
+      width: 180,
+      render: (_, record) =>
+        record.start_at
+          ? dayjs(record.start_at).format("YYYY-MM-DD HH:mm")
+          : t("common.notAvailable"),
+    },
+    {
+      title: t("events.isVirtualLabel"),
+      key: "is_virtual",
+      width: 110,
+      render: (_, record) => (
+        <Tag color={record.is_virtual ? "blue" : "default"}>
+          {record.is_virtual ? t("common.yes") : t("common.no")}
+        </Tag>
+      ),
+    },
+    {
+      title: t("events.publishedLabel"),
       key: "published",
-      width: 200,
+      width: 140,
       render: (_, record) => (
         <Badge
           status={record.published ? "success" : "default"}
           text={
             record.published
-              ? t("articles.publishedStatus")
-              : t("articles.draftStatus")
+              ? t("events.publishedStatus")
+              : t("events.draftStatus")
           }
         />
       ),
@@ -135,16 +160,16 @@ export default function ArticlesList() {
           <Button
             type="text"
             icon={<EyeOutlined />}
-            onClick={() => navigate(`/articles/${record.id}`)}
+            onClick={() => navigate(`/events/${record.slug}`)}
           />
           <Button
             type="text"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/articles/${record.id}/edit`)}
+            onClick={() => navigate(`/events/${record.slug}/edit`)}
           />
           <Popconfirm
             title={t("common.confirmDelete")}
-            description={t("articles.deleteConfirmMessage", {
+            description={t("events.deleteConfirmMessage", {
               title: getTitle(record),
             })}
             onConfirm={() => handleDelete(record.id)}
@@ -171,7 +196,7 @@ export default function ArticlesList() {
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
-              onClick={() => dispatch(fetchArticles({ page, limit }))}
+              onClick={() => dispatch(fetchEvents({ page, limit }))}
             >
               {t("common.retry")}
             </Button>
@@ -195,40 +220,54 @@ export default function ArticlesList() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <FileTextOutlined style={{ fontSize: 24, color: "#6B1A1A" }} />
+              <CalendarOutlined style={{ fontSize: 24, color: "#6B1A1A" }} />
               <span
                 style={{ fontSize: "20px", fontWeight: 600, color: "#6B1A1A" }}
               >
-                {t("navigation.articles")}
+                {t("navigation.events")}
               </span>
             </div>
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate("/articles/create")}
+              onClick={() => navigate("/events/create")}
               style={{ background: "#6B1A1A" }}
             >
-              {t("articles.create")}
+              {t("events.create")}
             </Button>
           </div>
         }
       >
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px", display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Input
-            placeholder={t("articles.searchPlaceholder")}
+            placeholder={t("events.searchPlaceholder")}
             allowClear
-            style={{ flex: 1, minWidth: 300, maxWidth: 400 }}
+            style={{ minWidth: 300, maxWidth: 400 }}
             prefix={<Search size={16} />}
             onChange={(e) => setSearchText(e.target.value)}
             value={searchText}
           />
+          <Select
+            allowClear
+            placeholder={t("events.publishedLabel")}
+            style={{ minWidth: 160 }}
+            value={publishedFilter}
+            onChange={(val) => {
+              setPublishedFilter(val);
+              dispatch(setEventsPage(1));
+            }}
+            options={[
+              { label: t("events.publishedStatus"), value: true },
+              { label: t("events.draftStatus"), value: false },
+            ]}
+          />
         </div>
 
-        {loading && !articles.length ? (
+        {loading && !events.length ? (
           <CenteredLoader minHeight={320} />
-        ) : articles.length > 0 ? (
+        ) : events.length > 0 ? (
           <Table
-            dataSource={articles}
+            dataSource={events}
             columns={columns}
             rowKey="id"
             loading={loading || deleting}
@@ -239,10 +278,10 @@ export default function ArticlesList() {
               showSizeChanger: true,
               onChange: (nextPage, nextLimit) => {
                 if (nextLimit !== limit) {
-                  dispatch(setLimit(nextLimit));
+                  dispatch(setEventsLimit(nextLimit));
                   return;
                 }
-                dispatch(setPage(nextPage));
+                dispatch(setEventsPage(nextPage));
               },
             }}
           />
@@ -254,10 +293,10 @@ export default function ArticlesList() {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate("/articles/create")}
+              onClick={() => navigate("/events/create")}
               style={{ background: "#6B1A1A" }}
             >
-              {t("articles.create")}
+              {t("events.create")}
             </Button>
           </Empty>
         )}

@@ -12,6 +12,8 @@ import LoginPage from '@/pages/auth/LoginPage';
 import AppLayout from '@/components/layout/AppLayout';
 import StaticSidebar from '@/components/layout/StaticSidebar';
 import ArticlesList from '@/pages/articles/ArticlesList';
+import ArticleDetail from '@/pages/articles/ArticleDetail';
+import ArticleForm from '@/pages/articles/ArticleForm';
 import EntitiesList from '@/pages/entities/EntitiesList';
 import EntityDetail from '@/pages/entities/EntityDetail';
 import EntityForm from '@/pages/entities/EntityForm';
@@ -33,6 +35,9 @@ import ProductForm from '@/pages/products/ProductForm';
 import SermonsList from '@/pages/sermons/SermonsList';
 import SermonDetail from '@/pages/sermons/SermonDetail';
 import SermonForm from '@/pages/sermons/SermonForm';
+import EventsList from '@/pages/events/EventsList';
+import EventDetail from '@/pages/events/EventDetail';
+import EventForm from '@/pages/events/EventForm';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import '@/styles/index.css';
 
@@ -99,6 +104,9 @@ export default function App() {
                       <Route path="saints/:id/edit" element={<ProtectedRoute requiredRole="Admin"><SaintForm /></ProtectedRoute>} />
 
                       <Route path="articles" element={<ProtectedRoute requiredRole="Admin"><ArticlesList /></ProtectedRoute>} />
+                      <Route path="articles/create" element={<ProtectedRoute requiredRole="Admin"><ArticleForm /></ProtectedRoute>} />
+                      <Route path="articles/:id" element={<ProtectedRoute requiredRole="Admin"><ArticleDetail /></ProtectedRoute>} />
+                      <Route path="articles/:id/edit" element={<ProtectedRoute requiredRole="Admin"><ArticleForm /></ProtectedRoute>} />
 
                       <Route path="entities" element={<ProtectedRoute requiredRole="Admin"><EntitiesList /></ProtectedRoute>} />
                       <Route path="entities/create" element={<ProtectedRoute requiredRole="Admin"><EntityForm /></ProtectedRoute>} />
@@ -119,6 +127,11 @@ export default function App() {
                       <Route path="sermons/create" element={<ProtectedRoute requiredRole="Admin"><SermonForm /></ProtectedRoute>} />
                       <Route path="sermons/:id" element={<ProtectedRoute requiredRole="Admin"><SermonDetail /></ProtectedRoute>} />
                       <Route path="sermons/:id/edit" element={<ProtectedRoute requiredRole="Admin"><SermonForm /></ProtectedRoute>} />
+
+                      <Route path="events" element={<ProtectedRoute requiredRole="Admin"><EventsList /></ProtectedRoute>} />
+                      <Route path="events/create" element={<ProtectedRoute requiredRole="Admin"><EventForm /></ProtectedRoute>} />
+                      <Route path="events/:slug" element={<ProtectedRoute requiredRole="Admin"><EventDetail /></ProtectedRoute>} />
+                      <Route path="events/:slug/edit" element={<ProtectedRoute requiredRole="Admin"><EventForm /></ProtectedRoute>} />
 
                       <Route path="*" element={<Navigate to="/home" replace />} />
                     </Route>

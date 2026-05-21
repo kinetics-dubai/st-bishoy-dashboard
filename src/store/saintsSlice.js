@@ -1,43 +1,44 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import apiService from '@/services/apiService';
-import { buildQuery } from '@/lib/queryHelper';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import apiService from "@/services/apiService";
+import { buildQuery } from "@/lib/queryHelper";
 
 const normalizeSaint = (saint) => {
   if (!saint) return saint;
 
   return {
     id: saint.id,
-    name: saint.name || '',
-    name_ar: saint.name_ar || '',
-    rank: saint.rank || '',
+    name: saint.name || "",
+    name_ar: saint.name_ar || "",
+    rank: saint.rank || "",
     departed: Boolean(saint.departed),
-    image: saint.image || '',
-    description: saint.description || '',
+    image: saint.image || "",
+    description: saint.description || "",
+    description_ar: saint.description_ar || "",
     hasDetails: Boolean(saint.hasDetails),
-    first_paragraph: saint.first_paragraph || '',
-    first_image: saint.first_image || '',
-    second_paragraph: saint.second_paragraph || '',
-    second_image: saint.second_image || '',
+    first_paragraph: saint.first_paragraph || "",
+    first_image: saint.first_image || "",
+    second_paragraph: saint.second_paragraph || "",
+    second_image: saint.second_image || "",
     ...saint,
   };
 };
 
 export const fetchSaints = createAsyncThunk(
-  'saints/fetchSaints',
+  "saints/fetchSaints",
   async (params = {}, { rejectWithValue }) => {
     try {
       const queryString = buildQuery(params);
-      const url = queryString ? `/saints?${queryString}` : '/saints';
+      const url = queryString ? `/saints?${queryString}` : "/saints";
       const response = await apiService.get(url);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchSaint = createAsyncThunk(
-  'saints/fetchSaint',
+  "saints/fetchSaint",
   async (id, { rejectWithValue }) => {
     try {
       const response = await apiService.get(`/saints/${id}`);
@@ -45,23 +46,23 @@ export const fetchSaint = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const createSaint = createAsyncThunk(
-  'saints/createSaint',
+  "saints/createSaint",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await apiService.post('/saints', data);
+      const response = await apiService.post("/saints", data);
       return normalizeSaint(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const updateSaint = createAsyncThunk(
-  'saints/updateSaint',
+  "saints/updateSaint",
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const response = await apiService.put(`/saints/${id}`, data);
@@ -69,11 +70,11 @@ export const updateSaint = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const deleteSaint = createAsyncThunk(
-  'saints/deleteSaint',
+  "saints/deleteSaint",
   async (id, { rejectWithValue }) => {
     try {
       await apiService.delete(`/saints/${id}`);
@@ -81,7 +82,7 @@ export const deleteSaint = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 const initialState = {
@@ -99,7 +100,7 @@ const initialState = {
 };
 
 const saintsSlice = createSlice({
-  name: 'saints',
+  name: "saints",
   initialState,
   reducers: {
     clearCurrentSaint: (state) => {
@@ -130,7 +131,8 @@ const saintsSlice = createSlice({
 
         state.loading = false;
         state.saints = (action.payload?.data || []).map(normalizeSaint);
-        state.total = action.payload?.totalCount || action.payload?.data?.length || 0;
+        state.total =
+          action.payload?.totalCount || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
       .addCase(fetchSaints.rejected, (state, action) => {
@@ -176,7 +178,9 @@ const saintsSlice = createSlice({
       .addCase(updateSaint.fulfilled, (state, action) => {
         state.updating = false;
         if (action.payload) {
-          const index = state.saints.findIndex((saint) => saint.id === action.payload.id);
+          const index = state.saints.findIndex(
+            (saint) => saint.id === action.payload.id,
+          );
           if (index !== -1) {
             state.saints[index] = action.payload;
           }
@@ -195,7 +199,9 @@ const saintsSlice = createSlice({
       })
       .addCase(deleteSaint.fulfilled, (state, action) => {
         state.deleting = false;
-        state.saints = state.saints.filter((saint) => saint.id !== action.payload);
+        state.saints = state.saints.filter(
+          (saint) => saint.id !== action.payload,
+        );
         if (state.total > 0) {
           state.total -= 1;
         }
@@ -210,6 +216,11 @@ const saintsSlice = createSlice({
   },
 });
 
-export const { clearCurrentSaint, clearSaintError, setSaintsPage, setSaintsLimit } = saintsSlice.actions;
+export const {
+  clearCurrentSaint,
+  clearSaintError,
+  setSaintsPage,
+  setSaintsLimit,
+} = saintsSlice.actions;
 
 export default saintsSlice.reducer;

@@ -173,6 +173,11 @@ export default function SaintDetail() {
                 <Descriptions.Item label={t("saints.description")}>
                   {currentSaint.description || t("common.notAvailable")}
                 </Descriptions.Item>
+                <Descriptions.Item label={t("saints.descriptionAr")}>
+                  <span dir="rtl" style={{ display: "block" }}>
+                    {currentSaint.description_ar || t("common.notAvailable")}
+                  </span>
+                </Descriptions.Item>
               </Descriptions>
             </div>
 

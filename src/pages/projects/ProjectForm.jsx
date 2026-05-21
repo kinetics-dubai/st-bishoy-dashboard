@@ -1,15 +1,24 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { Form, Input, Row, Col, message } from 'antd';
-import { ProjectOutlined, FileTextOutlined, PictureOutlined } from '@ant-design/icons';
-import { fetchProject, createProject, updateProject, clearCurrentProject } from '@/store/projectsSlice';
-import Base64ImageUpload from '@/components/Base64ImageUpload';
-import FormPageLayout from '@/components/FormPageLayout';
-import FormSection from '@/components/FormSection';
-import { resolveMediaUrl } from '@/lib/mediaUrl';
-import { getDirtyValues } from '@/lib/formUtils';
+import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { Form, Input, Row, Col, message } from "antd";
+import {
+  ProjectOutlined,
+  FileTextOutlined,
+  PictureOutlined,
+} from "@ant-design/icons";
+import {
+  fetchProject,
+  createProject,
+  updateProject,
+  clearCurrentProject,
+} from "@/store/projectsSlice";
+import Base64ImageUpload from "@/components/Base64ImageUpload";
+import FormPageLayout from "@/components/FormPageLayout";
+import FormSection from "@/components/FormSection";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
+import { getDirtyValues } from "@/lib/formUtils";
 
 const { TextArea } = Input;
 
@@ -19,10 +28,12 @@ export default function ProjectForm() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const { currentProject, loading, creating, updating } = useSelector((state) => state.projects);
+  const { currentProject, loading, creating, updating } = useSelector(
+    (state) => state.projects,
+  );
 
-  const isEditMode = !!id && !window.location.pathname.includes('/create');
-  const watchedThumbnail = Form.useWatch('thumbnail', form);
+  const isEditMode = !!id && !window.location.pathname.includes("/create");
+  const watchedThumbnail = Form.useWatch("thumbnail", form);
 
   useEffect(() => {
     if (isEditMode && id) {
@@ -30,17 +41,19 @@ export default function ProjectForm() {
     } else {
       dispatch(clearCurrentProject());
     }
-    return () => { dispatch(clearCurrentProject()); };
+    return () => {
+      dispatch(clearCurrentProject());
+    };
   }, [id, isEditMode, dispatch]);
 
   useEffect(() => {
     if (currentProject && isEditMode) {
       form.setFieldsValue({
-        title: currentProject.title || '',
-        title_ar: currentProject.title_ar || '',
-        description: currentProject.description || '',
-        description_ar: currentProject.description_ar || '',
-        thumbnail: currentProject.thumbnail || '',
+        title: currentProject.title || "",
+        title_ar: currentProject.title_ar || "",
+        description: currentProject.description || "",
+        description_ar: currentProject.description_ar || "",
+        thumbnail: currentProject.thumbnail || "",
       });
     }
   }, [currentProject, form, isEditMode]);
@@ -50,101 +63,133 @@ export default function ProjectForm() {
       const data = {
         title: values.title?.trim(),
         title_ar: values.title_ar?.trim(),
-        description: values.description?.trim() || '',
-        description_ar: values.description_ar?.trim() || '',
-        thumbnail: values.thumbnail || '',
+        description: values.description?.trim() || "",
+        description_ar: values.description_ar?.trim() || "",
+        thumbnail: values.thumbnail || "",
       };
 
       if (isEditMode) {
         const initial = {
-          title: currentProject.title?.trim() || '',
-          title_ar: currentProject.title_ar?.trim() || '',
-          description: currentProject.description?.trim() || '',
-          description_ar: currentProject.description_ar?.trim() || '',
-          thumbnail: currentProject.thumbnail || '',
+          title: currentProject.title?.trim() || "",
+          title_ar: currentProject.title_ar?.trim() || "",
+          description: currentProject.description?.trim() || "",
+          description_ar: currentProject.description_ar?.trim() || "",
+          thumbnail: currentProject.thumbnail || "",
         };
         const payload = getDirtyValues(data, initial);
         if (Object.keys(payload).length === 0) {
-          message.success(t('projects.updateSuccess'));
-          navigate('/projects');
+          message.success(t("projects.updateSuccess"));
+          navigate("/projects");
           return;
         }
         await dispatch(updateProject({ id, data: payload })).unwrap();
-        message.success(t('projects.updateSuccess'));
-        navigate('/projects');
+        message.success(t("projects.updateSuccess"));
+        navigate("/projects");
       } else {
         const createData = { ...data };
         if (!createData.thumbnail) delete createData.thumbnail;
         const response = await dispatch(createProject(createData)).unwrap();
-        message.success(t('projects.createSuccess'));
+        message.success(t("projects.createSuccess"));
         navigate(`/projects/${response.id}`);
       }
     } catch (error) {
-      message.error(error?.message || error?.detail || t('common.error'));
+      message.error(error?.message || error?.detail || t("common.error"));
     }
   };
 
-  const previewUrl = watchedThumbnail && !watchedThumbnail.startsWith('data:')
-    ? resolveMediaUrl(watchedThumbnail)
-    : watchedThumbnail;
+  const previewUrl =
+    watchedThumbnail && !watchedThumbnail.startsWith("data:")
+      ? resolveMediaUrl(watchedThumbnail)
+      : watchedThumbnail;
 
   return (
     <FormPageLayout
-      title={isEditMode ? t('projects.edit') : t('projects.create')}
-      subtitle={t('navigation.projects')}
+      title={isEditMode ? t("projects.edit") : t("projects.create")}
+      subtitle={t("navigation.projects")}
       backPath="/projects"
       form={form}
       saving={creating || updating}
       isEditMode={isEditMode}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <FormSection icon={<ProjectOutlined />} title={t('navigation.projects')}>
+        <FormSection
+          icon={<ProjectOutlined />}
+          title={t("navigation.projects")}
+        >
           <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
               <Form.Item
-                label={t('projects.title')}
+                label={t("projects.title")}
                 name="title"
-                rules={[{ required: true, message: t('validation.required') }]}
+                rules={[{ required: true, message: t("validation.required") }]}
               >
-                <Input size="large" placeholder={t('projects.titlePlaceholder')} />
+                <Input
+                  size="large"
+                  placeholder={t("projects.titlePlaceholder")}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label={t('projects.title_ar')}
+                label={t("projects.title_ar")}
                 name="title_ar"
-                rules={[{ required: true, message: t('validation.required') }]}
+                rules={[{ required: true, message: t("validation.required") }]}
               >
-                <Input size="large" dir="rtl" placeholder={t('projects.titleArPlaceholder')} />
+                <Input
+                  size="large"
+                  dir="rtl"
+                  placeholder={t("projects.titleArPlaceholder")}
+                />
               </Form.Item>
             </Col>
           </Row>
         </FormSection>
 
-        <FormSection icon={<FileTextOutlined />} title={t('projects.description')}>
+        <FormSection
+          icon={<FileTextOutlined />}
+          title={t("projects.description")}
+        >
           <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
-              <Form.Item label={t('projects.description')} name="description">
-                <TextArea rows={5} placeholder={t('projects.descriptionPlaceholder')} />
+              <Form.Item
+                rules={[{ required: true, message: t("validation.required") }]}
+                label={t("projects.description")}
+                name="description"
+              >
+                <TextArea
+                  rows={5}
+                  placeholder={t("projects.descriptionPlaceholder")}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label={t('projects.description_ar')} name="description_ar">
-                <TextArea rows={5} dir="rtl" placeholder={t('projects.descriptionArPlaceholder')} />
+              <Form.Item
+                rules={[{ required: true, message: t("validation.required") }]}
+                label={t("projects.description_ar")}
+                name="description_ar"
+              >
+                <TextArea
+                  rows={5}
+                  dir="rtl"
+                  placeholder={t("projects.descriptionArPlaceholder")}
+                />
               </Form.Item>
             </Col>
           </Row>
         </FormSection>
 
-        <FormSection icon={<PictureOutlined />} title={t('projects.thumbnail')}>
+        <FormSection icon={<PictureOutlined />} title={t("projects.thumbnail")}>
           <Row gutter={[24, 0]}>
             <Col xs={24} md={12}>
-              <Form.Item name="thumbnail">
+              <Form.Item
+                rules={[{ required: true, message: t("validation.required") }]}
+                name="thumbnail"
+              >
                 <Base64ImageUpload
-                  buttonLabel={t('projects.uploadThumbnail')}
-                  emptyLabel={t('projects.noThumbnail')}
-                  removeLabel={t('common.delete')}
-                  errorLabel={t('projects.imageProcessError')}
+                  buttonLabel={t("projects.uploadThumbnail")}
+                  emptyLabel={t("projects.noThumbnail")}
+                  removeLabel={t("common.delete")}
+                  errorLabel={t("projects.imageProcessError")}
                 />
               </Form.Item>
             </Col>
@@ -153,7 +198,12 @@ export default function ProjectForm() {
                 <img
                   src={previewUrl}
                   alt="preview"
-                  style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8 }}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 180,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                  }}
                 />
               </Col>
             )}

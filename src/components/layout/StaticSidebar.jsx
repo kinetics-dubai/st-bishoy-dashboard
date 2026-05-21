@@ -9,6 +9,7 @@ import {
   ShoppingOutlined,
   SoundOutlined,
   BookOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -55,12 +56,18 @@ export default function StaticSidebar({ collapsed }) {
       label: t('navigation.saints'),
       onClick: () => navigate('/saints'),
     },
-    // {
-    //   key: '/articles',
-    //   icon: <FileTextOutlined />,
-    //   label: t('navigation.articles'),
-    //   onClick: () => navigate('/articles'),
-    // },
+    {
+      key: '/articles',
+      icon: <FileTextOutlined />,
+      label: t('navigation.articles'),
+      onClick: () => navigate('/articles'),
+    },
+    {
+      key: '/events',
+      icon: <CalendarOutlined />,
+      label: t('navigation.events'),
+      onClick: () => navigate('/events'),
+    },
     {
       key: '/entities',
       icon: <HomeOutlined />,

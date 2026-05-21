@@ -36,8 +36,8 @@ const DEFAULT_HOME = {
   hero_monastery_location_ar: "",
   hero_monastery_hours: "",
   hero_monastery_hours_ar: "",
-  spiritual_verse_verse: "",
-  spiritual_verse_verse_ar: "",
+  spiritual_verse: "",
+  spiritual_verse_ar: "",
   spiritual_verse_chapter: "",
   spiritual_verse_chapter_ar: "",
   about_text: "",
@@ -157,8 +157,8 @@ function normalizeHome(payload) {
     hero_monastery_location_ar: hero.monastery_location_ar ?? "",
     hero_monastery_hours: hero.monastery_hours ?? "",
     hero_monastery_hours_ar: hero.monastery_hours_ar ?? "",
-    spiritual_verse_verse: spiritualVerse.verse ?? "",
-    spiritual_verse_verse_ar: spiritualVerse.verse_ar ?? spiritualVerseAr.verse ?? "",
+    spiritual_verse: spiritualVerse.verse ?? "",
+    spiritual_verse_ar: spiritualVerse.verse_ar ?? spiritualVerseAr.verse ?? "",
     spiritual_verse_chapter: spiritualVerse.chapter ?? "",
     spiritual_verse_chapter_ar:
       spiritualVerse.chapter_ar ?? spiritualVerseAr.chapter ?? "",
@@ -200,8 +200,8 @@ function buildHomePayload(values) {
     ),
     hero_monastery_hours: normalizeText(values.hero_monastery_hours),
     hero_monastery_hours_ar: normalizeText(values.hero_monastery_hours_ar),
-    spiritual_verse_verse: normalizeText(values.spiritual_verse_verse),
-    spiritual_verse_verse_ar: normalizeText(values.spiritual_verse_verse_ar),
+    spiritual_verse: normalizeText(values.spiritual_verse),
+    spiritual_verse_ar: normalizeText(values.spiritual_verse_ar),
     spiritual_verse_chapter: normalizeText(values.spiritual_verse_chapter),
     spiritual_verse_chapter_ar: normalizeText(
       values.spiritual_verse_chapter_ar,
@@ -266,8 +266,8 @@ export default function HomePage() {
       "hero_monastery_hours_ar",
     ],
     spiritual_verse: [
-      "spiritual_verse_verse",
-      "spiritual_verse_verse_ar",
+      "spiritual_verse",
+      "spiritual_verse_ar",
       "spiritual_verse_chapter",
       "spiritual_verse_chapter_ar",
     ],
@@ -366,32 +366,6 @@ export default function HomePage() {
         return;
       }
 
-      if (activeSection === "spiritual_verse") {
-        const serializeSpiritualVerse = (verse, chapter) => {
-          const normalizedVerse = normalizeText(verse);
-          const normalizedChapter = normalizeText(chapter);
-
-          if (!normalizedVerse && !normalizedChapter) return "";
-          if (normalizedVerse && normalizedChapter) {
-            return `${normalizedChapter}\n${normalizedVerse}`;
-          }
-
-          return normalizedChapter || normalizedVerse;
-        };
-
-        const spiritualVerse = serializeSpiritualVerse(
-          nextValues.spiritual_verse_verse,
-          nextValues.spiritual_verse_chapter,
-        );
-        const spiritualVerseAr = serializeSpiritualVerse(
-          nextValues.spiritual_verse_verse_ar,
-          nextValues.spiritual_verse_chapter_ar,
-        );
-
-        payload = { spiritual_verse: spiritualVerse };
-        if (spiritualVerseAr) payload.spiritual_verse_ar = spiritualVerseAr;
-      }
-
       await apiService.put("/home", payload);
       const refreshResponse = await apiService.get("/home");
       const normalizedHome = normalizeHome(refreshResponse.data);
@@ -402,7 +376,9 @@ export default function HomePage() {
     } catch (error) {
       const details = error?.details || error?.response?.data?.details;
       if (applyBackendValidationErrors(details)) {
-        message.error(error?.error || error?.response?.data?.error || t("home.saveError"));
+        message.error(
+          error?.error || error?.response?.data?.error || t("home.saveError"),
+        );
         return;
       }
 
@@ -464,7 +440,10 @@ export default function HomePage() {
                         label: t("home.spiritualVerseSection"),
                       },
                       { key: "about", label: t("home.aboutSection") },
-                      { key: "st_bishoy_bio", label: t("home.stBishoyBioSection") },
+                      {
+                        key: "st_bishoy_bio",
+                        label: t("home.stBishoyBioSection"),
+                      },
                       { key: "monastery", label: t("home.monasterySection") },
                       { key: "area", label: t("home.areaSection") },
                       { key: "papa", label: t("home.papaSection") },
@@ -476,7 +455,11 @@ export default function HomePage() {
 
             <Col xs={24} lg={18}>
               {activeSection === "hero" ? (
-                <Card size="small" title={t("home.heroSection")} style={{ borderRadius: 12 }}>
+                <Card
+                  size="small"
+                  title={t("home.heroSection")}
+                  style={{ borderRadius: 12 }}
+                >
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <Form.Item name="hero_title" label={t("home.heroTitle")}>
@@ -505,7 +488,10 @@ export default function HomePage() {
                       </Form.Item>
                     </Col>
                     <Col xs={24} md={12}>
-                      <Form.Item name="hero_text_ar" label={t("home.heroTextAr")}>
+                      <Form.Item
+                        name="hero_text_ar"
+                        label={t("home.heroTextAr")}
+                      >
                         <TextArea
                           rows={4}
                           dir="rtl"
@@ -556,7 +542,9 @@ export default function HomePage() {
                       >
                         <TextArea
                           rows={4}
-                          placeholder={t("home.heroMonasteryDescriptionPlaceholder")}
+                          placeholder={t(
+                            "home.heroMonasteryDescriptionPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -568,7 +556,9 @@ export default function HomePage() {
                         <TextArea
                           rows={4}
                           dir="rtl"
-                          placeholder={t("home.heroMonasteryDescriptionArPlaceholder")}
+                          placeholder={t(
+                            "home.heroMonasteryDescriptionArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -580,7 +570,9 @@ export default function HomePage() {
                         label={t("home.heroMonasteryLocation")}
                       >
                         <Input
-                          placeholder={t("home.heroMonasteryLocationPlaceholder")}
+                          placeholder={t(
+                            "home.heroMonasteryLocationPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -591,7 +583,9 @@ export default function HomePage() {
                       >
                         <Input
                           dir="rtl"
-                          placeholder={t("home.heroMonasteryLocationArPlaceholder")}
+                          placeholder={t(
+                            "home.heroMonasteryLocationArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -614,7 +608,9 @@ export default function HomePage() {
                       >
                         <Input
                           dir="rtl"
-                          placeholder={t("home.heroMonasteryHoursArPlaceholder")}
+                          placeholder={t(
+                            "home.heroMonasteryHoursArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -639,7 +635,7 @@ export default function HomePage() {
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <Form.Item
-                        name="spiritual_verse_verse"
+                        name="spiritual_verse"
                         label={t("home.spiritualVerseVerse")}
                       >
                         <TextArea
@@ -650,13 +646,15 @@ export default function HomePage() {
                     </Col>
                     <Col xs={24} md={12}>
                       <Form.Item
-                        name="spiritual_verse_verse_ar"
+                        name="spiritual_verse_ar"
                         label={t("home.spiritualVerseVerseAr")}
                       >
                         <TextArea
                           rows={3}
                           dir="rtl"
-                          placeholder={t("home.spiritualVerseVerseArPlaceholder")}
+                          placeholder={t(
+                            "home.spiritualVerseVerseArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -668,7 +666,9 @@ export default function HomePage() {
                         label={t("home.spiritualVerseChapter")}
                       >
                         <Input
-                          placeholder={t("home.spiritualVerseChapterPlaceholder")}
+                          placeholder={t(
+                            "home.spiritualVerseChapterPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -679,7 +679,9 @@ export default function HomePage() {
                       >
                         <Input
                           dir="rtl"
-                          placeholder={t("home.spiritualVerseChapterArPlaceholder")}
+                          placeholder={t(
+                            "home.spiritualVerseChapterArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -688,7 +690,11 @@ export default function HomePage() {
               ) : null}
 
               {activeSection === "about" ? (
-                <Card size="small" title={t("home.aboutSection")} style={{ borderRadius: 12 }}>
+                <Card
+                  size="small"
+                  title={t("home.aboutSection")}
+                  style={{ borderRadius: 12 }}
+                >
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <Form.Item name="about_text" label={t("home.aboutText")}>
@@ -736,7 +742,9 @@ export default function HomePage() {
                       >
                         <TextArea
                           rows={4}
-                          placeholder={t("home.stBishoyBioDescriptionPlaceholder")}
+                          placeholder={t(
+                            "home.stBishoyBioDescriptionPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -748,7 +756,9 @@ export default function HomePage() {
                         <TextArea
                           rows={4}
                           dir="rtl"
-                          placeholder={t("home.stBishoyBioDescriptionArPlaceholder")}
+                          placeholder={t(
+                            "home.stBishoyBioDescriptionArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -781,7 +791,9 @@ export default function HomePage() {
                       >
                         <TextArea
                           rows={4}
-                          placeholder={t("home.monasteryDescriptionPlaceholder")}
+                          placeholder={t(
+                            "home.monasteryDescriptionPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
@@ -793,12 +805,17 @@ export default function HomePage() {
                         <TextArea
                           rows={4}
                           dir="rtl"
-                          placeholder={t("home.monasteryDescriptionArPlaceholder")}
+                          placeholder={t(
+                            "home.monasteryDescriptionArPlaceholder",
+                          )}
                         />
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Form.Item name="monastery_image" label={t("home.monasteryImage")}>
+                  <Form.Item
+                    name="monastery_image"
+                    label={t("home.monasteryImage")}
+                  >
                     <Base64ImageUpload
                       buttonLabel={t("home.uploadMonasteryImage")}
                       emptyLabel={t("home.noImage")}
@@ -810,7 +827,11 @@ export default function HomePage() {
               ) : null}
 
               {activeSection === "area" ? (
-                <Card size="small" title={t("home.areaSection")} style={{ borderRadius: 12 }}>
+                <Card
+                  size="small"
+                  title={t("home.areaSection")}
+                  style={{ borderRadius: 12 }}
+                >
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <Form.Item
@@ -840,7 +861,11 @@ export default function HomePage() {
               ) : null}
 
               {activeSection === "papa" ? (
-                <Card size="small" title={t("home.papaSection")} style={{ borderRadius: 12 }}>
+                <Card
+                  size="small"
+                  title={t("home.papaSection")}
+                  style={{ borderRadius: 12 }}
+                >
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <Form.Item

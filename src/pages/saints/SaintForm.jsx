@@ -49,6 +49,7 @@ export default function SaintForm() {
       departed: currentSaint.departed ?? false,
       image: currentSaint.image || '',
       description: currentSaint.description || '',
+      description_ar: currentSaint.description_ar || '',
       hasDetails: currentSaint.hasDetails ?? false,
       first_paragraph: currentSaint.first_paragraph || '',
       first_image: currentSaint.first_image || '',
@@ -65,6 +66,7 @@ export default function SaintForm() {
       departed: values.departed ?? false,
       image: values.image || '',
       description: values.description?.trim() || '',
+      description_ar: values.description_ar?.trim() || '',
       hasDetails: values.hasDetails ?? false,
       first_paragraph: values.hasDetails ? values.first_paragraph?.trim() || '' : '',
       first_image: values.hasDetails ? values.first_image || '' : '',
@@ -82,6 +84,7 @@ export default function SaintForm() {
           departed: currentSaint.departed ?? false,
           image: currentSaint.image || '',
           description: currentSaint.description?.trim() || '',
+          description_ar: currentSaint.description_ar?.trim() || '',
           hasDetails: hasDetailsInitial,
           first_paragraph: hasDetailsInitial ? currentSaint.first_paragraph?.trim() || '' : '',
           first_image: hasDetailsInitial ? currentSaint.first_image || '' : '',
@@ -198,10 +201,17 @@ export default function SaintForm() {
 
         <FormSection icon={<FileTextOutlined />} title={t('saints.description')}>
           <Form.Item
+            label={t('saints.description')}
             name="description"
             rules={[{ required: true, message: t('validation.required', { field: t('saints.description') }) }]}
           >
             <TextArea rows={4} placeholder={t('saints.descriptionPlaceholder')} />
+          </Form.Item>
+          <Form.Item
+            label={t('saints.descriptionAr')}
+            name="description_ar"
+          >
+            <TextArea rows={4} dir="rtl" placeholder={t('saints.descriptionArPlaceholder')} />
           </Form.Item>
         </FormSection>
 

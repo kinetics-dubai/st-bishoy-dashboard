@@ -11,6 +11,7 @@ import saintsReducer from './saintsSlice';
 import projectsReducer from './projectsSlice';
 import productsReducer from './productsSlice';
 import sermonsReducer from './sermonsSlice';
+import eventsReducer from './eventsSlice';
 
 const persistConfig = {
   key: 'auth',
@@ -66,6 +67,7 @@ export const store = configureStore({
     projects: projectsReducer,
     products: productsReducer,
     sermons: sermonsReducer,
+    events: eventsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

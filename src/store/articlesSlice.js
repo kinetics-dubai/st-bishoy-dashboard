@@ -1,6 +1,20 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import apiService from '@/services/apiService';
 import { buildQuery } from '@/lib/queryHelper';
+
+const normalizeArticle = (article) => {
+  if (!article) return article;
+  return {
+    id: article.id,
+    title: article.title || '',
+    title_ar: article.title_ar || '',
+    content: article.content || '',
+    content_ar: article.content_ar || '',
+    cover_image: article.cover_image || '',
+    thumbnail: article.thumbnail || '',
+    published: Boolean(article.published),
+  };
+};
 
 export const fetchArticles = createAsyncThunk(
   'articles/fetchArticles',
@@ -21,7 +35,7 @@ export const fetchArticle = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await apiService.get(`/articles/${id}`);
-      return response.data?.data;
+      return normalizeArticle(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -33,7 +47,7 @@ export const createArticle = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await apiService.post('/articles', data);
-      return response.data?.data || response.data;
+      return normalizeArticle(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -45,7 +59,7 @@ export const updateArticle = createAsyncThunk(
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const response = await apiService.put(`/articles/${id}`, data);
-      return response.data?.data || response.data;
+      return normalizeArticle(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -71,10 +85,11 @@ const initialState = {
   limit: 10,
   total: 0,
   loading: false,
-  error: null,
   creating: false,
   updating: false,
   deleting: false,
+  error: null,
+  currentListRequestId: null,
 };
 
 const articlesSlice = createSlice({
@@ -97,22 +112,24 @@ const articlesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Articles
-      .addCase(fetchArticles.pending, (state) => {
+      .addCase(fetchArticles.pending, (state, action) => {
         state.loading = true;
         state.error = null;
+        state.currentListRequestId = action.meta.requestId;
       })
       .addCase(fetchArticles.fulfilled, (state, action) => {
+        if (state.currentListRequestId !== action.meta.requestId) return;
         state.loading = false;
-        state.articles = action.payload?.data || [];
-        state.total = action.payload?.totalCount || action.payload?.data?.length || 0;
+        state.articles = (action.payload?.data || []).map(normalizeArticle);
+        state.total = action.payload?.pagination?.total || action.payload?.data?.length || 0;
+        state.currentListRequestId = null;
       })
       .addCase(fetchArticles.rejected, (state, action) => {
+        if (state.currentListRequestId !== action.meta.requestId) return;
         state.loading = false;
         state.error = action.payload;
+        state.currentListRequestId = null;
       })
-      
-      // Fetch Single Article
       .addCase(fetchArticle.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -125,8 +142,6 @@ const articlesSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
-      // Create Article
       .addCase(createArticle.pending, (state) => {
         state.creating = true;
         state.error = null;
@@ -134,7 +149,7 @@ const articlesSlice = createSlice({
       .addCase(createArticle.fulfilled, (state, action) => {
         state.creating = false;
         if (action.payload) {
-          state.articles.push(action.payload);
+          state.articles.unshift(action.payload);
           state.total += 1;
         }
       })
@@ -142,8 +157,6 @@ const articlesSlice = createSlice({
         state.creating = false;
         state.error = action.payload;
       })
-      
-      // Update Article
       .addCase(updateArticle.pending, (state) => {
         state.updating = true;
         state.error = null;
@@ -151,11 +164,9 @@ const articlesSlice = createSlice({
       .addCase(updateArticle.fulfilled, (state, action) => {
         state.updating = false;
         if (action.payload) {
-          const index = state.articles.findIndex(a => a.base?.id === action.payload.base?.id);
-          if (index !== -1) {
-            state.articles[index] = action.payload;
-          }
-          if (state.currentArticle?.base?.id === action.payload.base?.id) {
+          const index = state.articles.findIndex((a) => a.id === action.payload.id);
+          if (index !== -1) state.articles[index] = action.payload;
+          if (String(state.currentArticle?.id) === String(action.payload.id)) {
             state.currentArticle = action.payload;
           }
         }
@@ -164,17 +175,15 @@ const articlesSlice = createSlice({
         state.updating = false;
         state.error = action.payload;
       })
-      
-      // Delete Article
       .addCase(deleteArticle.pending, (state) => {
         state.deleting = true;
         state.error = null;
       })
       .addCase(deleteArticle.fulfilled, (state, action) => {
         state.deleting = false;
-        state.articles = state.articles.filter(a => a.base?.id !== action.payload);
+        state.articles = state.articles.filter((a) => a.id !== action.payload);
         if (state.total > 0) state.total -= 1;
-        if (state.currentArticle?.base?.id === action.payload) {
+        if (String(state.currentArticle?.id) === String(action.payload)) {
           state.currentArticle = null;
         }
       })
