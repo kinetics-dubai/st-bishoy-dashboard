@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import apiService from "@/services/apiService";
-import { buildQuery } from "@/lib/queryHelper";
+import { buildQuery, PAGE_SIZE } from "@/lib/queryHelper";
 
 const normalizeSaint = (saint) => {
   if (!saint) return saint;
@@ -27,7 +27,7 @@ export const fetchSaints = createAsyncThunk(
   "saints/fetchSaints",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const queryString = buildQuery(params);
+      const queryString = buildQuery({ ...params, limit: PAGE_SIZE });
       const url = queryString ? `/saints?${queryString}` : "/saints";
       const response = await apiService.get(url);
       return response.data;
@@ -89,7 +89,6 @@ const initialState = {
   saints: [],
   currentSaint: null,
   page: 1,
-  limit: 10,
   total: 0,
   loading: false,
   creating: false,
@@ -112,10 +111,6 @@ const saintsSlice = createSlice({
     setSaintsPage: (state, action) => {
       state.page = action.payload;
     },
-    setSaintsLimit: (state, action) => {
-      state.limit = action.payload;
-      state.page = 1;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -132,7 +127,10 @@ const saintsSlice = createSlice({
         state.loading = false;
         state.saints = (action.payload?.data || []).map(normalizeSaint);
         state.total =
-          action.payload?.totalCount || action.payload?.data?.length || 0;
+          action.payload?.pagination?.total ||
+          action.payload?.totalCount ||
+          action.payload?.data?.length ||
+          0;
         state.currentListRequestId = null;
       })
       .addCase(fetchSaints.rejected, (state, action) => {
@@ -220,7 +218,6 @@ export const {
   clearCurrentSaint,
   clearSaintError,
   setSaintsPage,
-  setSaintsLimit,
 } = saintsSlice.actions;
 
 export default saintsSlice.reducer;

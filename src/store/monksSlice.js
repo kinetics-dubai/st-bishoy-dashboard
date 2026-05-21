@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "@/services/apiService";
-import { buildQuery } from "@/lib/queryHelper";
+import { buildQuery, PAGE_SIZE } from "@/lib/queryHelper";
 
 const normalizeMonk = (monk) => {
   if (!monk) return monk;
@@ -23,7 +23,7 @@ export const fetchMonks = createAsyncThunk(
   "monks/fetchMonks",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const queryString = buildQuery(params);
+      const queryString = buildQuery({ ...params, limit: PAGE_SIZE });
       const url = queryString ? `/monks?${queryString}` : "/monks";
       const response = await apiService.get(url);
       return {
@@ -88,7 +88,6 @@ const initialState = {
   monks: [],
   currentMonk: null,
   page: 1,
-  limit: 10,
   total: 0,
   loading: false,
   error: null,
@@ -112,10 +111,6 @@ const monksSlice = createSlice({
     setPage: (state, action) => {
       state.page = action.payload;
     },
-    setLimit: (state, action) => {
-      state.limit = action.payload;
-      state.page = 1;
-    },
     setTotal: (state, action) => {
       state.total = action.payload;
     },
@@ -135,7 +130,10 @@ const monksSlice = createSlice({
         state.loading = false;
         state.monks = action.payload?.data || [];
         state.total =
-          action.payload?.totalCount || action.payload?.data?.length || 0;
+          action.payload?.pagination?.total ||
+          action.payload?.totalCount ||
+          action.payload?.data?.length ||
+          0;
         state.currentListRequestId = null;
       })
       .addCase(fetchMonks.rejected, (state, action) => {
@@ -215,6 +213,6 @@ const monksSlice = createSlice({
   },
 });
 
-export const { clearCurrentMonk, clearError, setPage, setLimit, setTotal } =
+export const { clearCurrentMonk, clearError, setPage, setTotal } =
   monksSlice.actions;
 export default monksSlice.reducer;

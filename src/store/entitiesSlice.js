@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import apiService from "@/services/apiService";
-import { buildQuery } from "@/lib/queryHelper";
+import { buildQuery, PAGE_SIZE } from "@/lib/queryHelper";
 
 function normalizeEntitySection(section) {
   return {
@@ -85,7 +85,6 @@ const initialState = {
   entities: [],
   currentEntity: null,
   page: 1,
-  limit: 10,
   total: 0,
   loading: false,
   error: null,
@@ -99,7 +98,7 @@ export const fetchEntities = createAsyncThunk(
   "entities/fetchEntities",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const queryString = buildQuery(params);
+      const queryString = buildQuery({ ...params, limit: PAGE_SIZE });
       const url = queryString ? `/entities?${queryString}` : "/entities";
       const response = await apiService.get(url);
       return response.data;
@@ -170,10 +169,6 @@ const entitiesSlice = createSlice({
     setPage: (state, action) => {
       state.page = action.payload;
     },
-    setLimit: (state, action) => {
-      state.limit = action.payload;
-      state.page = 1;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -190,7 +185,10 @@ const entitiesSlice = createSlice({
         state.loading = false;
         state.entities = (action.payload?.data || []).map(normalizeEntity);
         state.total =
-          action.payload?.totalCount || action.payload?.data?.length || 0;
+          action.payload?.pagination?.total ||
+          action.payload?.totalCount ||
+          action.payload?.data?.length ||
+          0;
         state.currentListRequestId = null;
       })
       .addCase(fetchEntities.rejected, (state, action) => {
@@ -274,6 +272,6 @@ const entitiesSlice = createSlice({
   },
 });
 
-export const { clearCurrentEntity, clearError, setPage, setLimit } =
+export const { clearCurrentEntity, clearError, setPage } =
   entitiesSlice.actions;
 export default entitiesSlice.reducer;

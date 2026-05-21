@@ -15,7 +15,8 @@ import {
 } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Users, Search } from 'lucide-react';
-import { fetchMonks, deleteMonk, setPage, setLimit } from '@/store/monksSlice';
+import { fetchMonks, deleteMonk, setPage } from '@/store/monksSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 import CenteredLoader from '@/components/CenteredLoader';
 import { getRankLabel } from '@/lib/ranks';
 
@@ -23,7 +24,7 @@ export default function MonksList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { monks, loading, error, deleting, page, limit, total } = useSelector((state) => state.monks);
+  const { monks, loading, error, deleting, page, total } = useSelector((state) => state.monks);
 
   const [searchText, setSearchText] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
@@ -50,8 +51,8 @@ export default function MonksList() {
       return;
     }
 
-    dispatch(fetchMonks({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    dispatch(fetchMonks({ page, search: searchDebounce }));
+  }, [dispatch, page, searchDebounce]);
 
   const getMonkName = (monk) => {
     return i18n.language === 'ar' && monk.name_ar ? monk.name_ar : monk.name;
@@ -130,7 +131,7 @@ export default function MonksList() {
       <div style={{ padding: '24px' }}>
         <Card>
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button type="primary" onClick={() => dispatch(fetchMonks({ page, limit }))}>
+            <Button type="primary" onClick={() => dispatch(fetchMonks({ page }))}>
               {t('common.retry')}
             </Button>
           </Empty>
@@ -182,16 +183,10 @@ export default function MonksList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setLimit(nextLimit));
-                  return;
-                }
-                dispatch(setPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setPage(nextPage)),
             }}
           />
         ) : (

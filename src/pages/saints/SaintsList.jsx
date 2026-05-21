@@ -5,7 +5,8 @@ import { Avatar, Button, Card, Empty, Image, Space, Table, Tag, Typography, mess
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { Church, ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { deleteSaint, fetchSaints, setSaintsLimit, setSaintsPage } from '@/store/saintsSlice';
+import { deleteSaint, fetchSaints, setSaintsPage } from '@/store/saintsSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 import CenteredLoader from '@/components/CenteredLoader';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
 import { getRankLabel } from '@/lib/ranks';
@@ -16,11 +17,11 @@ export default function SaintsList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { saints, loading, deleting, error, page, limit, total } = useSelector((state) => state.saints);
+  const { saints, loading, deleting, error, page, total } = useSelector((state) => state.saints);
 
   useEffect(() => {
-    dispatch(fetchSaints({ page, limit }));
-  }, [dispatch, page, limit]);
+    dispatch(fetchSaints({ page }));
+  }, [dispatch, page]);
 
   const getSaintName = (saint) => {
     return i18n.language === 'ar' && saint.name_ar ? saint.name_ar : saint.name;
@@ -115,7 +116,7 @@ export default function SaintsList() {
       <div style={{ padding: '24px' }}>
         <Card>
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button type="primary" onClick={() => dispatch(fetchSaints({ page, limit }))}>
+            <Button type="primary" onClick={() => dispatch(fetchSaints({ page }))}>
               {t('common.retry')}
             </Button>
           </Empty>
@@ -150,16 +151,10 @@ export default function SaintsList() {
             dataSource={saints}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setSaintsLimit(nextLimit));
-                  return;
-                }
-                dispatch(setSaintsPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setSaintsPage(nextPage)),
             }}
           />
         )}

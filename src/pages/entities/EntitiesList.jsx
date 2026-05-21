@@ -5,7 +5,8 @@ import { Avatar, Button, Card, Empty, Space, Table, Tag, Typography, message } f
 import { DeleteOutlined, EditOutlined, EyeOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
-import { deleteEntity, fetchEntities, setLimit, setPage } from '@/store/entitiesSlice';
+import { deleteEntity, fetchEntities, setPage } from '@/store/entitiesSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 import CenteredLoader from '@/components/CenteredLoader';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
 
@@ -15,7 +16,7 @@ export default function EntitiesList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { entities, loading, deleting, error, page, limit, total } = useSelector((state) => state.entities);
+  const { entities, loading, deleting, error, page, total } = useSelector((state) => state.entities);
 
   const [searchText, setSearchText] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
@@ -42,8 +43,8 @@ export default function EntitiesList() {
       return;
     }
 
-    dispatch(fetchEntities({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    dispatch(fetchEntities({ page, search: searchDebounce }));
+  }, [dispatch, page, searchDebounce]);
 
   useEffect(() => {
     if (error) {
@@ -194,16 +195,10 @@ export default function EntitiesList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setLimit(nextLimit));
-                  return;
-                }
-                dispatch(setPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setPage(nextPage)),
             }}
           />
         ) : (

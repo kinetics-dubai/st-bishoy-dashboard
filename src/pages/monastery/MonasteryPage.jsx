@@ -36,6 +36,7 @@ const HISTORY_ITEM_SHAPE = {
 const MYRON_TIMELINE_ITEM_SHAPE = {
   date: "",
   text: "",
+  text_ar: "",
 };
 
 const DEVELOPMENT_IMAGE_SHAPE = {
@@ -408,21 +409,18 @@ function MyronTimelineList({ t }) {
                 name={[field.name, "date"]}
                 label={t("monastery.rowDate")}
               >
-                <Input
-                  dir="rtl"
-                  placeholder={t("monastery.rowDatePlaceholder")}
-                />
+                <Input placeholder={t("monastery.rowDatePlaceholder")} />
               </Form.Item>
-              <Form.Item
-                name={[field.name, "text"]}
-                label={t("monastery.rowText")}
-              >
-                <TextArea
-                  rows={4}
-                  dir="rtl"
-                  placeholder={t("monastery.rowTextPlaceholder")}
-                />
-              </Form.Item>
+              <BilingualTextFields
+                leftName={[field.name, "text"]}
+                leftLabel={t("monastery.rowText")}
+                leftPlaceholder={t("monastery.rowTextPlaceholder")}
+                rightName={[field.name, "text_ar"]}
+                rightLabel={t("monastery.rowTextAr")}
+                rightPlaceholder={t("monastery.rowTextArPlaceholder")}
+                textarea
+                rows={4}
+              />
             </Card>
           ))}
         </>
