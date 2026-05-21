@@ -20,6 +20,7 @@ import {
 } from "@ant-design/icons";
 import { ProjectOutlined } from "@ant-design/icons";
 import { fetchProjects, deleteProject } from "@/store/projectsSlice";
+import { PAGE_SIZE } from "@/lib/queryHelper";
 import CenteredLoader from "@/components/CenteredLoader";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
 
@@ -174,7 +175,7 @@ export default function ProjectsList() {
             columns={columns}
             rowKey="id"
             loading={loading || deleting}
-            pagination={{ pageSize: 10, showSizeChanger: false }}
+            pagination={{ pageSize: PAGE_SIZE, showSizeChanger: false }}
           />
         ) : (
           <Empty

@@ -6,7 +6,8 @@ import { Card, Table, Button, Space, Popconfirm, Empty, Input, message, Avatar, 
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ShoppingOutlined } from '@ant-design/icons';
 import { Search } from 'lucide-react';
-import { fetchProducts, deleteProduct, setProductsPage, setProductsLimit } from '@/store/productsSlice';
+import { fetchProducts, deleteProduct, setProductsPage } from '@/store/productsSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 import CenteredLoader from '@/components/CenteredLoader';
 import { resolveMediaUrl } from '@/lib/mediaUrl';
 
@@ -14,7 +15,7 @@ export default function ProductsList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { products, loading, error, deleting, page, limit, total } = useSelector((state) => state.products);
+  const { products, loading, error, deleting, page, total } = useSelector((state) => state.products);
 
   const [searchText, setSearchText] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
@@ -35,8 +36,8 @@ export default function ProductsList() {
       dispatch(setProductsPage(1));
       return;
     }
-    dispatch(fetchProducts({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    dispatch(fetchProducts({ page, search: searchDebounce }));
+  }, [dispatch, page, searchDebounce]);
 
   const getTitle = (record) =>
     i18n.language === 'ar' && record.title_ar ? record.title_ar : record.title;
@@ -109,7 +110,7 @@ export default function ProductsList() {
       <div style={{ padding: '24px' }}>
         <Card>
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button type="primary" onClick={() => dispatch(fetchProducts({ page, limit }))}>
+            <Button type="primary" onClick={() => dispatch(fetchProducts({ page }))}>
               {t('common.retry')}
             </Button>
           </Empty>
@@ -161,16 +162,10 @@ export default function ProductsList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setProductsLimit(nextLimit));
-                  return;
-                }
-                dispatch(setProductsPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setProductsPage(nextPage)),
             }}
           />
         ) : (

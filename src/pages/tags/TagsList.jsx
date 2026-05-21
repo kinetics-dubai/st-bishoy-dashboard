@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Table, Button, Space, Typography, Modal, message, Input, Tag, Select } from 'antd';
 import { PlusOutlined, DeleteOutlined, TagOutlined, EyeOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { fetchTags, deleteTag, setPage, setLimit } from '@/store/tagsSlice';
+import { fetchTags, deleteTag, setPage } from '@/store/tagsSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -15,7 +16,7 @@ const TagsList = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   
-  const { tags, loading, deleting, error, page, limit, total } = useSelector((state) => state.tags);
+  const { tags, loading, deleting, error, page, total } = useSelector((state) => state.tags);
   
   const [searchText, setSearchText] = useState('');
   const [categoryFilter, setCategoryFilter] = useState(null);
@@ -50,13 +51,12 @@ const TagsList = () => {
       return;
     }
 
-    dispatch(fetchTags({ 
-      page, 
-      limit, 
+    dispatch(fetchTags({
+      page,
       search: searchDebounce,
       category: categoryFilter
     }));
-  }, [dispatch, page, limit, searchDebounce, categoryFilter]);
+  }, [dispatch, page, searchDebounce, categoryFilter]);
 
   useEffect(() => {
     if (error) {
@@ -66,10 +66,6 @@ const TagsList = () => {
 
   const handlePageChange = (newPage) => {
     dispatch(setPage(newPage));
-  };
-
-  const handleLimitChange = (newLimit) => {
-    dispatch(setLimit(newLimit));
   };
 
   const handleDelete = (tag) => {
@@ -247,10 +243,9 @@ const TagsList = () => {
           loading={loading}
           pagination={{
             current: page,
-            pageSize: limit,
-            total: total,
+            pageSize: PAGE_SIZE,
+            total,
             onChange: handlePageChange,
-            onShowSizeChange: (_, newLimit) => handleLimitChange(newLimit),
             showSizeChanger: false,
             showQuickJumper: false,
           }}

@@ -28,8 +28,8 @@ import {
   fetchEvents,
   deleteEvent,
   setEventsPage,
-  setEventsLimit,
 } from "@/store/eventsSlice";
+import { PAGE_SIZE } from "@/lib/queryHelper";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
 import CenteredLoader from "@/components/CenteredLoader";
 
@@ -37,7 +37,7 @@ export default function EventsList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { events, loading, error, deleting, page, limit, total } =
+  const { events, loading, error, deleting, page, total } =
     useSelector((state) => state.events);
 
   const [searchText, setSearchText] = useState("");
@@ -60,10 +60,10 @@ export default function EventsList() {
       dispatch(setEventsPage(1));
       return;
     }
-    const params = { page, limit, search: searchDebounce };
+    const params = { page, search: searchDebounce };
     if (publishedFilter !== undefined) params.published = publishedFilter;
     dispatch(fetchEvents(params));
-  }, [dispatch, page, limit, searchDebounce, publishedFilter]);
+  }, [dispatch, page, searchDebounce, publishedFilter]);
 
   const getTitle = (record) =>
     i18n.language === "ar" && record.title_ar ? record.title_ar : record.title;
@@ -196,7 +196,7 @@ export default function EventsList() {
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
-              onClick={() => dispatch(fetchEvents({ page, limit }))}
+              onClick={() => dispatch(fetchEvents({ page }))}
             >
               {t("common.retry")}
             </Button>
@@ -273,16 +273,10 @@ export default function EventsList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setEventsLimit(nextLimit));
-                  return;
-                }
-                dispatch(setEventsPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setEventsPage(nextPage)),
             }}
           />
         ) : (

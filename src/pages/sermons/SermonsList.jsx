@@ -6,7 +6,8 @@ import { Card, Table, Button, Space, Popconfirm, Empty, Input, message, Tag } fr
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { SoundOutlined } from '@ant-design/icons';
 import { Search } from 'lucide-react';
-import { fetchSermons, deleteSermon, setSermonsPage, setSermonsLimit } from '@/store/sermonsSlice';
+import { fetchSermons, deleteSermon, setSermonsPage } from '@/store/sermonsSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 import CenteredLoader from '@/components/CenteredLoader';
 import dayjs from 'dayjs';
 
@@ -14,7 +15,7 @@ export default function SermonsList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { sermons, loading, error, deleting, page, limit, total } = useSelector((state) => state.sermons);
+  const { sermons, loading, error, deleting, page, total } = useSelector((state) => state.sermons);
 
   const [searchText, setSearchText] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
@@ -35,8 +36,8 @@ export default function SermonsList() {
       dispatch(setSermonsPage(1));
       return;
     }
-    dispatch(fetchSermons({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    dispatch(fetchSermons({ page, search: searchDebounce }));
+  }, [dispatch, page, searchDebounce]);
 
   const getTitle = (record) =>
     i18n.language === 'ar' && record.title_ar ? record.title_ar : record.title;
@@ -103,7 +104,7 @@ export default function SermonsList() {
       <div style={{ padding: '24px' }}>
         <Card>
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button type="primary" onClick={() => dispatch(fetchSermons({ page, limit }))}>
+            <Button type="primary" onClick={() => dispatch(fetchSermons({ page }))}>
               {t('common.retry')}
             </Button>
           </Empty>
@@ -155,16 +156,10 @@ export default function SermonsList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setSermonsLimit(nextLimit));
-                  return;
-                }
-                dispatch(setSermonsPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setSermonsPage(nextPage)),
             }}
           />
         ) : (

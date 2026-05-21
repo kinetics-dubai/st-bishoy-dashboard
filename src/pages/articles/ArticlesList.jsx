@@ -25,8 +25,8 @@ import {
   fetchArticles,
   deleteArticle,
   setPage,
-  setLimit,
 } from "@/store/articlesSlice";
+import { PAGE_SIZE } from "@/lib/queryHelper";
 import { resolveMediaUrl } from "@/lib/mediaUrl";
 import CenteredLoader from "@/components/CenteredLoader";
 
@@ -34,7 +34,7 @@ export default function ArticlesList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
-  const { articles, loading, error, deleting, page, limit, total } =
+  const { articles, loading, error, deleting, page, total } =
     useSelector((state) => state.articles);
 
   const [searchText, setSearchText] = useState("");
@@ -56,8 +56,8 @@ export default function ArticlesList() {
       dispatch(setPage(1));
       return;
     }
-    dispatch(fetchArticles({ page, limit, search: searchDebounce }));
-  }, [dispatch, page, limit, searchDebounce]);
+    dispatch(fetchArticles({ page, search: searchDebounce }));
+  }, [dispatch, page, searchDebounce]);
 
   const getTitle = (record) =>
     i18n.language === "ar" && record.title_ar ? record.title_ar : record.title;
@@ -171,7 +171,7 @@ export default function ArticlesList() {
           <Empty description={error} image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
-              onClick={() => dispatch(fetchArticles({ page, limit }))}
+              onClick={() => dispatch(fetchArticles({ page }))}
             >
               {t("common.retry")}
             </Button>
@@ -234,16 +234,10 @@ export default function ArticlesList() {
             loading={loading || deleting}
             pagination={{
               current: page,
-              pageSize: limit,
+              pageSize: PAGE_SIZE,
               total,
-              showSizeChanger: true,
-              onChange: (nextPage, nextLimit) => {
-                if (nextLimit !== limit) {
-                  dispatch(setLimit(nextLimit));
-                  return;
-                }
-                dispatch(setPage(nextPage));
-              },
+              showSizeChanger: false,
+              onChange: (nextPage) => dispatch(setPage(nextPage)),
             }}
           />
         ) : (

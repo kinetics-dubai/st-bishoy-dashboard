@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Table, Tag, Space, Modal, message, Input, Select, Card, Avatar } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { fetchUsers, deleteUser, setPage, setLimit } from '@/store/usersSlice';
+import { fetchUsers, deleteUser, setPage } from '@/store/usersSlice';
+import { PAGE_SIZE } from '@/lib/queryHelper';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -14,7 +15,7 @@ const UsersList = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const { users, loading, deleting, page, limit, total } = useSelector((state) => state.users);
+  const { users, loading, deleting, page, total } = useSelector((state) => state.users);
 
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -38,21 +39,16 @@ const UsersList = () => {
       return;
     }
 
-    dispatch(fetchUsers({ 
-      page, 
-      limit, 
-      search: searchText, 
+    dispatch(fetchUsers({
+      page,
+      search: searchText,
       role: roleFilter !== 'all' ? roleFilter : undefined,
-      active: statusFilter !== 'all' ? statusFilter : undefined 
+      active: statusFilter !== 'all' ? statusFilter : undefined
     }));
-  }, [dispatch, page, limit, searchText, roleFilter, statusFilter]);
+  }, [dispatch, page, searchText, roleFilter, statusFilter]);
 
   const handlePageChange = (newPage) => {
     dispatch(setPage(newPage));
-  };
-
-  const handleLimitChange = (newLimit) => {
-    dispatch(setLimit(newLimit));
   };
 
   const handleDelete = (user) => {
@@ -264,8 +260,8 @@ const UsersList = () => {
           loading={loading}
           pagination={{
             current: page,
-            pageSize: limit,
-            total: total,
+            pageSize: PAGE_SIZE,
+            total,
             onChange: handlePageChange,
             showSizeChanger: false,
             showQuickJumper: true,
