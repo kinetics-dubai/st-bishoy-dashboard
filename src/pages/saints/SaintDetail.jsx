@@ -199,6 +199,11 @@ export default function SaintDetail() {
                   {currentSaint.first_paragraph || t("common.notAvailable")}
                 </Paragraph>
               </Descriptions.Item>
+              <Descriptions.Item label={t("saints.firstParagraphAr")}>
+                <Paragraph dir="rtl" style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                  {currentSaint.first_paragraph_ar || t("common.notAvailable")}
+                </Paragraph>
+              </Descriptions.Item>
               <Descriptions.Item label={t("saints.firstImage")}>
                 <DetailImage
                   src={currentSaint.first_image}
@@ -209,6 +214,11 @@ export default function SaintDetail() {
               <Descriptions.Item label={t("saints.secondParagraph")}>
                 <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
                   {currentSaint.second_paragraph || t("common.notAvailable")}
+                </Paragraph>
+              </Descriptions.Item>
+              <Descriptions.Item label={t("saints.secondParagraphAr")}>
+                <Paragraph dir="rtl" style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+                  {currentSaint.second_paragraph_ar || t("common.notAvailable")}
                 </Paragraph>
               </Descriptions.Item>
               <Descriptions.Item label={t("saints.secondImage")}>

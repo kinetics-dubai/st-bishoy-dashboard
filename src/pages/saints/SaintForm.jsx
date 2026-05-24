@@ -52,8 +52,10 @@ export default function SaintForm() {
       description_ar: currentSaint.description_ar || '',
       hasDetails: currentSaint.hasDetails ?? false,
       first_paragraph: currentSaint.first_paragraph || '',
+      first_paragraph_ar: currentSaint.first_paragraph_ar || '',
       first_image: currentSaint.first_image || '',
       second_paragraph: currentSaint.second_paragraph || '',
+      second_paragraph_ar: currentSaint.second_paragraph_ar || '',
       second_image: currentSaint.second_image || '',
     });
   }, [currentSaint, form, isEditMode]);
@@ -69,8 +71,10 @@ export default function SaintForm() {
       description_ar: values.description_ar?.trim() || '',
       hasDetails: values.hasDetails ?? false,
       first_paragraph: values.hasDetails ? values.first_paragraph?.trim() || '' : '',
+      first_paragraph_ar: values.hasDetails ? values.first_paragraph_ar?.trim() || '' : '',
       first_image: values.hasDetails ? values.first_image || '' : '',
       second_paragraph: values.hasDetails ? values.second_paragraph?.trim() || '' : '',
+      second_paragraph_ar: values.hasDetails ? values.second_paragraph_ar?.trim() || '' : '',
       second_image: values.hasDetails ? values.second_image || '' : '',
     };
 
@@ -87,8 +91,10 @@ export default function SaintForm() {
           description_ar: currentSaint.description_ar?.trim() || '',
           hasDetails: hasDetailsInitial,
           first_paragraph: hasDetailsInitial ? currentSaint.first_paragraph?.trim() || '' : '',
+          first_paragraph_ar: hasDetailsInitial ? currentSaint.first_paragraph_ar?.trim() || '' : '',
           first_image: hasDetailsInitial ? currentSaint.first_image || '' : '',
           second_paragraph: hasDetailsInitial ? currentSaint.second_paragraph?.trim() || '' : '',
+          second_paragraph_ar: hasDetailsInitial ? currentSaint.second_paragraph_ar?.trim() || '' : '',
           second_image: hasDetailsInitial ? currentSaint.second_image || '' : '',
         };
         const dirtyPayload = getDirtyValues(payload, initial);
@@ -244,6 +250,10 @@ export default function SaintForm() {
                 <TextArea rows={5} placeholder={t('saints.firstParagraphPlaceholder')} />
               </Form.Item>
 
+              <Form.Item label={t('saints.firstParagraphAr')} name="first_paragraph_ar">
+                <TextArea rows={5} dir="rtl" placeholder={t('saints.firstParagraphArPlaceholder')} />
+              </Form.Item>
+
               <Row gutter={[24, 0]}>
                 <Col xs={24} md={12}>
                   <Form.Item label={t('saints.firstImage')} name="first_image" valuePropName="value">
@@ -262,6 +272,10 @@ export default function SaintForm() {
 
               <Form.Item label={t('saints.secondParagraph')} name="second_paragraph">
                 <TextArea rows={5} placeholder={t('saints.secondParagraphPlaceholder')} />
+              </Form.Item>
+
+              <Form.Item label={t('saints.secondParagraphAr')} name="second_paragraph_ar">
+                <TextArea rows={5} dir="rtl" placeholder={t('saints.secondParagraphArPlaceholder')} />
               </Form.Item>
 
               <Row gutter={[24, 0]}>

@@ -134,7 +134,7 @@ const eventsSlice = createSlice({
         state.loading = false;
         state.events = (action.payload?.data || []).map(normalizeEvent);
         state.total =
-          action.payload?.totalCount || action.payload?.data?.length || 0;
+          action.payload?.pagination?.total || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
       .addCase(fetchEvents.rejected, (state, action) => {

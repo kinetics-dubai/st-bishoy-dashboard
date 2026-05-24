@@ -121,7 +121,7 @@ const articlesSlice = createSlice({
         if (state.currentListRequestId !== action.meta.requestId) return;
         state.loading = false;
         state.articles = (action.payload?.data || []).map(normalizeArticle);
-        state.total = action.payload?.totalCount || action.payload?.pagination?.total || action.payload?.data?.length || 0;
+        state.total = action.payload?.pagination?.total || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
       .addCase(fetchArticles.rejected, (state, action) => {

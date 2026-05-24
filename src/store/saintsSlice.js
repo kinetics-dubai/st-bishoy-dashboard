@@ -16,8 +16,10 @@ const normalizeSaint = (saint) => {
     description_ar: saint.description_ar || "",
     hasDetails: Boolean(saint.hasDetails),
     first_paragraph: saint.first_paragraph || "",
+    first_paragraph_ar: saint.first_paragraph_ar || "",
     first_image: saint.first_image || "",
     second_paragraph: saint.second_paragraph || "",
+    second_paragraph_ar: saint.second_paragraph_ar || "",
     second_image: saint.second_image || "",
     ...saint,
   };
