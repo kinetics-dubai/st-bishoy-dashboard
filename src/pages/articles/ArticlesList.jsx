@@ -10,6 +10,7 @@ import {
   Popconfirm,
   Empty,
   Input,
+  Select,
   message,
   Badge,
 } from "antd";
@@ -39,6 +40,7 @@ export default function ArticlesList() {
 
   const [searchText, setSearchText] = useState("");
   const [searchDebounce, setSearchDebounce] = useState("");
+  const [publishedFilter, setPublishedFilter] = useState(undefined);
   const previousSearchRef = useRef("");
 
   useEffect(() => {
@@ -56,8 +58,10 @@ export default function ArticlesList() {
       dispatch(setPage(1));
       return;
     }
-    dispatch(fetchArticles({ page, search: searchDebounce }));
-  }, [dispatch, page, searchDebounce]);
+    const params = { page, search: searchDebounce };
+    if (publishedFilter !== undefined) params.published = publishedFilter;
+    dispatch(fetchArticles(params));
+  }, [dispatch, page, searchDebounce, publishedFilter]);
 
   const getTitle = (record) =>
     i18n.language === "ar" && record.title_ar ? record.title_ar : record.title;
@@ -213,14 +217,28 @@ export default function ArticlesList() {
           </div>
         }
       >
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px", display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Input
             placeholder={t("articles.searchPlaceholder")}
             allowClear
-            style={{ flex: 1, minWidth: 300, maxWidth: 400 }}
+            style={{ minWidth: 300, maxWidth: 400 }}
             prefix={<Search size={16} />}
             onChange={(e) => setSearchText(e.target.value)}
             value={searchText}
+          />
+          <Select
+            allowClear
+            placeholder={t("articles.publishedLabel")}
+            style={{ minWidth: 160 }}
+            value={publishedFilter}
+            onChange={(val) => {
+              setPublishedFilter(val);
+              dispatch(setPage(1));
+            }}
+            options={[
+              { label: t("articles.publishedStatus"), value: true },
+              { label: t("articles.draftStatus"), value: false },
+            ]}
           />
         </div>
 

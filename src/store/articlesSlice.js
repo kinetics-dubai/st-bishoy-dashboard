@@ -21,7 +21,7 @@ export const fetchArticles = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       const queryString = buildQuery(params);
-      const url = queryString ? `/articles?${queryString}` : '/articles';
+      const url = queryString ? `/articles/admin?${queryString}` : '/articles/admin';
       const response = await apiService.get(url);
       return response.data;
     } catch (error) {
@@ -34,7 +34,7 @@ export const fetchArticle = createAsyncThunk(
   'articles/fetchArticle',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/articles/${id}`);
+      const response = await apiService.get(`/articles/admin/${id}`);
       return normalizeArticle(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -121,7 +121,7 @@ const articlesSlice = createSlice({
         if (state.currentListRequestId !== action.meta.requestId) return;
         state.loading = false;
         state.articles = (action.payload?.data || []).map(normalizeArticle);
-        state.total = action.payload?.pagination?.total || action.payload?.data?.length || 0;
+        state.total = action.payload?.totalCount || action.payload?.pagination?.total || action.payload?.data?.length || 0;
         state.currentListRequestId = null;
       })
       .addCase(fetchArticles.rejected, (state, action) => {

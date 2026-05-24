@@ -46,7 +46,7 @@ export const fetchEvent = createAsyncThunk(
   "events/fetchEvent",
   async (slug, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/events/${slug}`);
+      const response = await apiService.get(`/events/admin/${slug}`);
       return normalizeEvent(response.data?.data || response.data);
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

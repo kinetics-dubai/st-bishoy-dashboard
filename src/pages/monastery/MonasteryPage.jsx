@@ -28,7 +28,6 @@ const { TextArea } = Input;
 
 const HISTORY_ITEM_SHAPE = {
   date: "",
-  date_ar: "",
   text: "",
   text_ar: "",
 };
@@ -342,14 +341,12 @@ function HistoryList({ t, name, titleKey, addLabelKey }) {
                 </Button>
               }
             >
-              <BilingualTextFields
-                leftName={[field.name, "date"]}
-                leftLabel={t("monastery.rowDate")}
-                leftPlaceholder={t("monastery.rowDatePlaceholder")}
-                rightName={[field.name, "date_ar"]}
-                rightLabel={t("monastery.rowDateAr")}
-                rightPlaceholder={t("monastery.rowDateArPlaceholder")}
-              />
+              <Form.Item
+                name={[field.name, "date"]}
+                label={t("monastery.rowDate")}
+              >
+                <Input placeholder={t("monastery.rowDatePlaceholder")} />
+              </Form.Item>
               <BilingualTextFields
                 leftName={[field.name, "text"]}
                 leftLabel={t("monastery.rowText")}
