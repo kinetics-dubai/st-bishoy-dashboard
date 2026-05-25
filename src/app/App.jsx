@@ -17,6 +17,7 @@ import ArticleForm from '@/pages/articles/ArticleForm';
 import EntitiesList from '@/pages/entities/EntitiesList';
 import EntityDetail from '@/pages/entities/EntityDetail';
 import EntityForm from '@/pages/entities/EntityForm';
+import EntityGalleryForm from '@/pages/entities/EntityGalleryForm';
 import MonksList from '@/pages/monks/MonksList';
 import MonkDetail from '@/pages/monks/MonkDetail';
 import MonkForm from '@/pages/monks/MonkForm';
@@ -112,6 +113,7 @@ export default function App() {
                       <Route path="entities/create" element={<ProtectedRoute requiredRole="Admin"><EntityForm /></ProtectedRoute>} />
                       <Route path="entities/:id" element={<ProtectedRoute requiredRole="Admin"><EntityDetail /></ProtectedRoute>} />
                       <Route path="entities/:id/edit" element={<ProtectedRoute requiredRole="Admin"><EntityForm /></ProtectedRoute>} />
+                      <Route path="entities/:id/gallery" element={<ProtectedRoute requiredRole="Admin"><EntityGalleryForm /></ProtectedRoute>} />
 
                       <Route path="projects" element={<ProtectedRoute requiredRole="Admin"><ProjectsList /></ProtectedRoute>} />
                       <Route path="projects/create" element={<ProtectedRoute requiredRole="Admin"><ProjectForm /></ProtectedRoute>} />

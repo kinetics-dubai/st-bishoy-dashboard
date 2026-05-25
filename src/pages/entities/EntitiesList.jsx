@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, Card, Empty, Space, Table, Tag, Typography, message } from 'antd';
-import { DeleteOutlined, EditOutlined, EyeOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeOutlined, HomeOutlined, PictureOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { deleteEntity, fetchEntities, setPage } from '@/store/entitiesSlice';
@@ -125,6 +125,7 @@ export default function EntitiesList() {
         <Space size="small">
           <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`/entities/${record.id}`)} />
           <Button type="text" icon={<EditOutlined />} onClick={() => navigate(`/entities/${record.id}/edit`)} />
+          <Button type="text" icon={<PictureOutlined />} onClick={() => navigate(`/entities/${record.id}/gallery`)} />
           <Button
             type="text"
             danger

@@ -20,9 +20,6 @@ import {
   BookOutlined,
   EnvironmentOutlined,
   StarOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-  PictureOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -147,18 +144,6 @@ export default function EntityForm() {
       vr_url: currentEntity.vr_url || "",
       hasDetails: currentEntity.hasDetails ?? false,
       parentId: currentEntity.parentId ?? undefined,
-      gallery: currentEntity.gallery
-        ? {
-            title: currentEntity.gallery.title || "",
-            title_ar: currentEntity.gallery.title_ar || "",
-            items: (currentEntity.gallery.items || []).map((item) => ({
-              id: item.id,
-              image: item.path || item.image || "",
-              caption: item.caption || "",
-              caption_ar: item.caption_ar || "",
-            })),
-          }
-        : { title: "", title_ar: "", items: [] },
     });
   }, [currentEntity, form, isEditing]);
 
@@ -202,18 +187,6 @@ export default function EntityForm() {
         entity_landmarks_description: hasDetails ? normalizeOptionalText(values.entity_landmarks_description) : null,
         entity_landmarks_description_ar: hasDetails ? normalizeOptionalText(values.entity_landmarks_description_ar) : null,
         entity_landmarks_image: hasDetails ? normalizeOptionalValue(values.entity_landmarks_image) : null,
-        gallery: hasDetails
-          ? {
-              title: normalizeOptionalText(values.gallery?.title),
-              title_ar: normalizeOptionalText(values.gallery?.title_ar),
-              items: (values.gallery?.items || []).map((item) => ({
-                ...(item.id ? { id: item.id } : {}),
-                image: normalizeOptionalValue(item.image),
-                caption: normalizeOptionalText(item.caption),
-                caption_ar: normalizeOptionalText(item.caption_ar),
-              })),
-            }
-          : null,
         vr_url: hasDetails ? normalizeOptionalText(values.vr_url) : null,
         thumbnail: normalizeOptionalValue(values.thumbnail),
         hasDetails,
@@ -243,20 +216,6 @@ export default function EntityForm() {
           entity_landmarks_description: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_landmarks_description) : null,
           entity_landmarks_description_ar: hasDetailsInitial ? normalizeOptionalText(currentEntity.entity_landmarks_description_ar) : null,
           entity_landmarks_image: hasDetailsInitial ? normalizeOptionalValue(currentEntity.entity_landmarks_image) : null,
-          gallery: hasDetailsInitial
-            ? currentEntity.gallery
-              ? {
-                  title: normalizeOptionalText(currentEntity.gallery.title),
-                  title_ar: normalizeOptionalText(currentEntity.gallery.title_ar),
-                  items: (currentEntity.gallery.items || []).map((item) => ({
-                    id: item.id,
-                    image: normalizeOptionalValue(item.path || item.image),
-                    caption: normalizeOptionalText(item.caption),
-                    caption_ar: normalizeOptionalText(item.caption_ar),
-                  })),
-                }
-              : { title: null, title_ar: null, items: [] }
-            : null,
           vr_url: hasDetailsInitial ? normalizeOptionalText(currentEntity.vr_url) : null,
           thumbnail: normalizeOptionalValue(currentEntity.thumbnail),
           hasDetails: hasDetailsInitial,
@@ -551,95 +510,6 @@ export default function EntityForm() {
                   <ImagePreview src={watchedLandmarksImage} label={t("entities.entityLandmarksImage")} />
                 </Col>
               </Row>
-            </FormSection>
-
-            <FormSection icon={<PictureOutlined />} title={t("entities.gallerySection")}>
-              <Row gutter={[24, 0]}>
-                <Col xs={24} md={12}>
-                  <Form.Item name={["gallery", "title"]} label={t("entities.galleryTitle")}>
-                    <Input placeholder={t("entities.galleryTitlePlaceholder")} size="large" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item name={["gallery", "title_ar"]} label={t("entities.galleryTitleAr")}>
-                    <Input dir="rtl" placeholder={t("entities.galleryTitleArPlaceholder")} size="large" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.List name={["gallery", "items"]}>
-                {(fields, { add, remove }) => (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    {fields.map(({ key, name }) => (
-                      <div
-                        key={key}
-                        style={{
-                          border: "1px solid rgba(107,26,26,0.12)",
-                          borderRadius: 12,
-                          padding: 16,
-                          background: "#fdf9f4",
-                          position: "relative",
-                        }}
-                      >
-                        <Button
-                          danger
-                          type="text"
-                          icon={<DeleteOutlined />}
-                          size="small"
-                          onClick={() => remove(name)}
-                          style={{ position: "absolute", top: 12, right: 12 }}
-                        >
-                          {t("entities.galleryRemoveImage")}
-                        </Button>
-
-                        <Row gutter={[24, 0]}>
-                          <Col xs={24} md={12}>
-                            <Form.Item
-                              name={[name, "image"]}
-                              label={t("entities.galleryUploadImage")}
-                            >
-                              <Base64ImageUpload
-                                buttonLabel={t("entities.galleryUploadImage")}
-                                emptyLabel={t("entities.noImage")}
-                                removeLabel={t("entities.removeImage")}
-                                errorLabel={t("entities.imageProcessError")}
-                              />
-                            </Form.Item>
-                          </Col>
-                        </Row>
-
-                        <Row gutter={[24, 0]}>
-                          <Col xs={24} md={12}>
-                            <Form.Item
-                              name={[name, "caption"]}
-                              label={t("entities.galleryItemCaption")}
-                            >
-                              <Input placeholder={t("entities.galleryItemCaptionPlaceholder")} />
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} md={12}>
-                            <Form.Item
-                              name={[name, "caption_ar"]}
-                              label={t("entities.galleryItemCaptionAr")}
-                            >
-                              <Input dir="rtl" placeholder={t("entities.galleryItemCaptionArPlaceholder")} />
-                            </Form.Item>
-                          </Col>
-                        </Row>
-                      </div>
-                    ))}
-
-                    <Button
-                      type="dashed"
-                      onClick={() => add({ image: "", caption: "", caption_ar: "" })}
-                      icon={<PlusOutlined />}
-                      style={{ width: "100%" }}
-                    >
-                      {t("entities.galleryAddImage")}
-                    </Button>
-                  </div>
-                )}
-              </Form.List>
             </FormSection>
 
             <FormSection icon={<LinkOutlined />} title={t("entities.vrSection")}>
