@@ -277,8 +277,8 @@ export default function ProductForm() {
                 label={t("products.description")}
                 name="description"
                 rules={[
-                  { required: true, message: t("validation.required") },
                   {
+                    required: true,
                     validator: (_, value) =>
                       String(value ?? "").trim().length
                         ? Promise.resolve()
@@ -297,8 +297,8 @@ export default function ProductForm() {
                 label={t("products.description_ar")}
                 name="description_ar"
                 rules={[
-                  { required: true, message: t("validation.required") },
                   {
+                    required: true,
                     validator: (_, value) =>
                       String(value ?? "").trim().length
                         ? Promise.resolve()
@@ -322,8 +322,8 @@ export default function ProductForm() {
               <Form.Item
                 name="image"
                 rules={[
-                  { required: true, message: t("validation.required") },
                   {
+                    required: true,
                     validator: (_, value) =>
                       typeof value === "string" && value.trim().length
                         ? Promise.resolve()

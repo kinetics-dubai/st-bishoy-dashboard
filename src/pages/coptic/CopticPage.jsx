@@ -126,28 +126,28 @@ export default function CopticPage() {
     });
   };
 
-  useEffect(() => {
-    const fetchCoptic = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.get("/coptic");
-        const normalized = normalizeCoptic(response.data);
-        setCopticId(normalized.id || DEFAULT_COPTIC.id);
-        setInitialCoptic(normalized);
-        form.setFieldsValue(normalized);
-      } catch (error) {
-        message.error(
-          error?.response?.data?.message ||
-            error?.message ||
-            t("coptic.fetchError"),
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchCoptic = async ({ showLoadingSpinner = true } = {}) => {
+    try {
+      if (showLoadingSpinner) setLoading(true);
+      const response = await apiService.get("/coptic");
+      const normalized = normalizeCoptic(response.data);
+      setCopticId(normalized.id || DEFAULT_COPTIC.id);
+      setInitialCoptic(normalized);
+      form.setFieldsValue(normalized);
+    } catch (error) {
+      message.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          t("coptic.fetchError"),
+      );
+    } finally {
+      if (showLoadingSpinner) setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCoptic();
-  }, [form, t]);
+  }, []);
 
   const applyBackendValidationErrors = (details) => {
     if (!Array.isArray(details) || !details.length) return false;
@@ -197,15 +197,8 @@ export default function CopticPage() {
         return;
       }
 
-      const response = await apiService.put("/coptic", payload);
-      const nextBaselineSource = response?.data?.data
-        ? response.data
-        : { ...initialCoptic, ...nextValues, ...payload, id: copticId };
-      const normalized = normalizeCoptic(nextBaselineSource);
-
-      setCopticId(normalized.id || copticId);
-      setInitialCoptic(normalized);
-      form.setFieldsValue(normalized);
+      await apiService.put("/coptic", payload);
+      await fetchCoptic({ showLoadingSpinner: false });
       message.success(t("coptic.saveSuccess"));
     } catch (error) {
       const details = error?.details || error?.response?.data?.details;
